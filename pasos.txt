@@ -1,0 +1,190 @@
+CREANDO PROYECTO DJANGO:
+
+
+_ Paso 1: creando entorno Virtual:
+
+comando-crear    -> python -m venv menv
+comando-activar  -> menv/Scripts/activate
+comando-activar  -> source menv/Scripts/activate
+comando-desactivar  -> deactivate
+
+#---------------------------------------------------------------
+            Django, INSTALANDO LAS DEPENDENCIAS
+. Si estas bajando de git pasate a paso 3 a caso 2.
+#---------------------------------------------------------------
+
+_ Paso 2: Instalar django y Estar activado el ENTORNO VIRTUAL SIEMPRE:
+
+. comando -> pip install Django
+
+. comando para ver las librerias -> pip freeze
+
+_ Paso 2.1: Para usar (Django REST Framework) instalar:
+. Comando -> [pip install djangorestframework]
+
+#---------------------------------------------------------------
+_ Paso 3 -> Para  guardar las librerias Instalas de Python:
+_ Mejor hacer al ""ultimo"" para guardar la lista de ependencias instaladas 
+en tu entorno virtual de Django. 
+#---------------------------------------------------------------
+
+
+# comando caso 1 -> [pip freeze > requirements.txt]
+Crea un archivo de requisitos con los paquetes actualmente instalados.
+
+# comando caso 2-> [pip install -r requirements.txt]
+Instala paquetes desde un archivo de las dependecias existente del proyecto,
+en caso existe el archivo requirements.txt.
+
+_ 3.1 -> para ver en consola las dependecias instaladas:
+. comando -> [nano requirements.txt]
+
+
+#---------------------------------------------------------------
+     . Creando una Proyecto Principal y sus APLICACION:
+#---------------------------------------------------------------
+
+. Paso 4:
+
+# Creando un proyecto -> core:
+===> (core) es la principal de TODAS:
+. comando -> django-admin startproject core
+
+    DJANGO-REST/
+    |-- inmuebles/
+    |   |-- inmuebles/
+    |   |   |-- __init__.py
+    |   |   |-- admin.py
+    |   |   |-- apps.py
+    |   |   |-- models.py
+    |   |   |-- serializers.py
+    |   |   |-- tests.py
+    |   |   |-- views.py
+    |   |-- manage.py
+    |-- menv/
+
+. Paso 5:
+
+# comando para crear una app adentro del Proyecto
+commando -> [[python manage.py startapp products]]
+_ movies
+_ reviews
+_ products
+_ etc...
+
+# AVISO -> AL CREAR UNA NUEVA APLICACION:
+-> 1. dentro de cada apliacion [urls.py]
+-> 2. dentro de cada apliacion [serializer.py]
+
+#---------------------------------------------------------------
+      		A hora levantar la aplicación
+#---------------------------------------------------------------
+
+
+_ Paso 6: 
+. Comando -> [python manage.py runserver]
+
+_ va a salir un error en rojo que son las migraciones, commando para arreglar y 
+las migraciones Tambien va a crear la base de datos que viene por defecto q es SQLite:
+_ Paso 6.1:
+. commando - [python manage.py makemigrations]
+. commando - [python manage.py migrate]
+
+
+
+_ Paso 7: para crear superUser:
+
+. comando -> [python manage.py createsuperuser]
+. Username: williams392
+. email: v_s392@gmail.com
+. Password: l_45
+
+
+#---------------------------------------------------------------
+      		    Para documentar Django con drf-yasg
+#---------------------------------------------------------------
+herramienta que automatiza la generación de documentación de API en formato 
+Swagger/OpenAPI 2.0 a partir de tu código de Django REST Framework
+
+https://pypi.org/search/?q=drf-yasg
+
+_ Instalar drf-yasg
+. comando -> [pip install drf-yasg]
+
+_ guia:
+https://drf-yasg.readthedocs.io/en/stable/readme.html#installation
+
+#---------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+      		    Apuntes de Desarrollo:
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+
+
+_ ORM de pyhton.py:
+
+1. AutoField:
+Django es muy similar a la columna IDENTITY en SQL. Ambos se 
+utilizan para generar valores únicos y autoincrementados para 
+las claves primarias de las tablas.
+
+2. UUDI:
+Campo unico y no se puede modificar y tambien mayor seguridad.
+https://docs.djangoproject.com/en/5.1/ref/models/fields/
+
+3. CACASDE:
+Cuando se utiliza CASCADE, si el objeto relacionado es eliminado, 
+también se eliminarán todos los objetos que dependen de él.
+
+4. PROTECT:
+Cuando se utiliza PROTECT, si el objeto relacionado es eliminado,
+se producirá una excepción IntegrityError.
+
+5. Modelos en Django: Relaciones entre modelos.
+https://cursa.app/es/pagina/modelos-en-django-relaciones-entre-modelos#:~:text=Hay%20tres%20tipos%20principales%20de,tipos%20de%20relaciones%20entre%20datos.
+
+
+_ serializer.py:
+
+1. write_only = true:
+Es requerido y cuando el servidor responda con los datos del 
+perfil, el campo profile_type no estará presente en la respuesta.
+
+2. read_only = true:
+En un campo de un serializer indica que el campo solo debe ser utilizado 
+para lectura, es decir, para mostrar datos en las respuestas, pero no 
+debe ser incluido en las solicitudes para crear o actualizar instancias.
+
+
+_ Authentication con django - token:
+
+1. Token: 
+se utiliza para generar y almacenar tokens de autenticación para los 
+usuarios. Cada token es único y se asocia a un usuario específico.
+
+2. okenAuthentication: 
+se utiliza para autenticar las solicitudes basadas en tokens. Esta 
+clase verifica que el token proporcionado en la solicitud es válido 
+y está asociado a un usuario.
+
+3. IsAuthenticated: 
+Es un permiso que se utiliza para restringir el acceso a las vistas 
+solo a usuarios autenticados. Si un usuario no está autenticado, no podrá
+acceder a las vistas protegidas por este permiso.
