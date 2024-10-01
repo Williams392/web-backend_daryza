@@ -9,43 +9,41 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Categoria, Marca, UnidadMedida, Producto
 from .serializers import CategoriaSerializer, MarcaSerializer, UnidadMedidaSerializer, ProductoSerializer
 
+from rest_framework.permissions import IsAuthenticated
+from authentication.permissions import IsAlmacen
 
 class CategoriaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre', 'estado']
 
 class MarcaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre', 'estado']
 
 class UnidadMedidaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = UnidadMedida.objects.all()
     serializer_class = UnidadMedidaSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre', 'abreviacion']
 
-class ProductoViewSet(viewsets.ModelViewSet):
-    queryset = Producto.objects.all()
-    serializer_class = ProductoSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre', 'codigo', 'estado', 'marca', 'categoria']
-
-# PRODUCTO:
-
 class ProductoFilter(filters.FilterSet):
-    nombre = filters.CharFilter(lookup_expr='icontains')  # Filtra por nombre
-    marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  # Filtra por marca
-    categoria = filters.CharFilter(field_name='categoria__nombre', lookup_expr='icontains')  # Filtra por subcategoría
+    nombre = filters.CharFilter(lookup_expr='icontains') 
+    marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  
+    categoria = filters.CharFilter(field_name='categoria__nombre', lookup_expr='icontains') 
 
     class Meta:
         model = Producto
         fields = ['nombre', 'marca', 'categoria']
 
 class ProductoView(APIView):
+    permission_classes = [IsAuthenticated, IsAlmacen]
     
     def get(self, request, pk_producto=None):
         if pk_producto:  # Ver detalles de un producto específico

@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
-from .models import CustomUser, Profile, ProfileType
+from .models import CustomUser, Rol, Perfil
 
 # Register your models here.
 class CustomUserAdmin(UserAdmin, admin.ModelAdmin):
@@ -33,13 +33,12 @@ class CustomUserAdmin(UserAdmin, admin.ModelAdmin):
     )
 
 
-class ProfileTypeAdmin(admin.ModelAdmin):
-    list_display = ('id', 'profile_type')
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name_role')
 
 class ProfileAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'profile_type')
+    list_display = ('id', 'user', 'name_role')
 
 admin.site.register(CustomUser, CustomUserAdmin)
-
-admin.site.register(ProfileType, ProfileTypeAdmin)
-admin.site.register(Profile, ProfileAdmin)
+admin.site.register(Perfil, ProfileAdmin)
+admin.site.register(Rol, RoleAdmin)

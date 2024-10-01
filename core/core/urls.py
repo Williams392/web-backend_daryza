@@ -21,5 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('authentication.urls')),
     path('api/almacen/', include('gestion_almacen.urls')),
-    path('api/gestion_movimientos/', include('gestion_movimientos.urls')),
+    path('api/movimientos/', include('gestion_movimientos.urls')),
 ]

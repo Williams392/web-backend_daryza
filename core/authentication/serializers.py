@@ -1,42 +1,37 @@
 from rest_framework import serializers
-
-from .models import CustomUser
+from .models import CustomUser, Rol, Perfil
 
 class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
 
 class UserSerializer(serializers.ModelSerializer):
-    username = serializers.CharField(required = False, write_only = True)
+    username = serializers.CharField(required=False, write_only=True)
     first_name = serializers.CharField(required=True)
     last_name = serializers.CharField(required=True)
     email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True, write_only=True)
     phone_number = serializers.CharField(required=True)
-    profile_type = serializers.CharField(required=False, write_only = True)
+    roles = serializers.PrimaryKeyRelatedField(queryset=Rol.objects.all(), many=True, required=False)  # Hacer roles opcional
 
     class Meta:
         model = CustomUser
         fields = '__all__'
 
     def create(self, validated_data):
-        profile_type = validated_data.pop('profile_type', None)
+        roles = validated_data.pop('roles', [])
         user = super().create(validated_data)
-        return user, profile_type
+        if roles:
+            user.roles.set(roles)  # Asignar roles solo si existen
+        return user
 
-    
-    # def create(self, validated_data):
-    #     print("Creando un usuario")
-    #     profile_type = validated_data.pop('profile_type', None)  # Eliminar el campo profile_type si existe
-    #     return super().create(validated_data), profile_type
+class RolSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rol
+        fields = ['id', 'name_role']
 
-
-
-'''
-# write_only = true  -> es requerido y cuando el servidor responda con los 
-datos del perfil, el campo profile_type no estará presente en la respuesta.
-
-# read_only = true -> n un campo de un serializer indica que el campo solo 
-debe ser utilizado para lectura, es decir, para mostrar datos en las respuestas, 
-pero no debe ser incluido en las solicitudes para crear o actualizar instancias.
-'''
+class PerfilSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Perfil
+        fields = ['id', 'user', 'name_role']
+        depth = 1  # Para mostrar detalles del usuario y rol

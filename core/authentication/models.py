@@ -1,5 +1,4 @@
 from django.db import models
-
 from django.contrib.auth.models import AbstractUser
 import uuid
 
@@ -15,49 +14,24 @@ class CustomUser(AbstractUser):
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
-    USERNAME_FIELD = 'email' # cambiando el login de admin a email:
+    USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username', 'password']
 
     def __str__(self):
         return f"{self.username} - {self.email}"
 
-# Tipo de Perfil:
-class ProfileType(models.Model):
-    #id_tipoPerfil = models.AutoField(max_length=50, primary_key=True)
-    profile_type = models.CharField(max_length = 50)
-
-    """
-    Catálogo para manejar los tipos de perfiles:
-    1. Administrador
-    2. Almacenero
-    3. Cajero
-    """
+# Modelo de Roles
+class Rol(models.Model):
+    name_role = models.CharField(max_length=50, unique=True)
 
     def __str__(self):
-        return self.profile_type
-
-class Profile(models.Model):
+        return self.name_role
+    
+class Perfil(models.Model):
     user = models.OneToOneField(CustomUser, on_delete = models.CASCADE)
-    profile_type = models.ForeignKey(ProfileType, on_delete = models.PROTECT)
+    name_role = models.ForeignKey(Rol, on_delete = models.PROTECT)
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
     
-
-
-'''
-    Class profile:
-
-    No es bueno poner todos estos datos, esta clase es para 
-    la eleccion que tipo de perfil, no es crear un user.
     
-    biography = models.TextField(blank=True) 
-    company = models.CharField(max_length=70, blank=True)
-    address = models.CharField(max_length=200, blank=True)
-    profession = models.CharField(max_length=100, blank=True)
-    occupation = models.CharField(max_length=250, blank=True)
-    linkedin_link = models.URLField(max_length=250, blank=True)
-    website_link = models.URLField(max_length=250, blank=True)
-    birthday = models.DateField(null=True, blank=True)
-    is_active = models.BooleanField(default=True)
-'''

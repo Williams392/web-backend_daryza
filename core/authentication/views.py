@@ -1,5 +1,6 @@
-from .serializers import LoginSerializer, UserSerializer
-from .models import ProfileType, Profile
+from .serializers import LoginSerializer, UserSerializer, RolSerializer, PerfilSerializer
+from .models import CustomUser, Rol, Perfil
+from rest_framework import generics
 
 from datetime import datetime
 
@@ -16,54 +17,49 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from .models import CustomUser # porse acaso para la clase registerView
-
+from authentication.permissions import IsAdmin
 
 # Inicio de sesión
 class InicioSesionView(APIView):
-
     def post(self, request):
-        # Validar que los datos del formulario sean correctos
         email = request.data.get("email")
         password = request.data.get("password")
         
-        # 1. Verificar que el email y contraseña sean proporcionados
         if not email or not password:
             return Response(
                 {"code": 400, "msg": "Correo electrónico y contraseña son requeridos."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Limpiar los datos de email
-        email = email.strip()
-
-        # 2. Autenticación de usuario
         user = authenticate(request, email=email, password=password) 
         
         if user is None:
-            # Credenciales inválidas
             return Response(
                 {"code": 401, "msg": "Credenciales inválidas."},
                 status=status.HTTP_401_UNAUTHORIZED
             )
 
-        # 3. Verificar si el usuario tiene un perfil asociado
         try:
-            profile = Profile.objects.get(user=user)
-            # Si el usuario tiene un perfil, generar el token y responder con los datos del usuario
+            perfil = Perfil.objects.get(user=user)
+            
+            # Verificar si el usuario tiene el rol de Administrador y asignar superuser
+            if perfil.name_role.name_role == "Administrador":
+                user.is_superuser = True
+                user.save()
+            
             token, _ = Token.objects.get_or_create(user=user)
             user_serializer = UserSerializer(user)
             user_data = dict(user_serializer.data)
             user_data['token'] = str(token.key)
             return Response(user_data, status=status.HTTP_200_OK)
         
-        except Profile.DoesNotExist:
-            # El usuario no tiene un perfil asociado
+        except Perfil.DoesNotExist:
             return Response(
                 {"code": 301, "msg": "El usuario no tiene un perfil, crea una cuenta primero."},
                 status=status.HTTP_301_MOVED_PERMANENTLY
-            ) 
-        
+            )
+
+
 
 # Registro de nuevos usuarios
 class RegistroView(APIView):
@@ -77,7 +73,9 @@ class RegistroView(APIView):
         last_name = serializer.validated_data['last_name']
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
+        name_role_id = request.data.get('name_role', None)  # Obtener el rol si está presente
 
+        # Generar un nombre de usuario único
         username = f"{first_name.lower()}_{last_name.lower()}"
         if CustomUser.objects.filter(username=username).exists():
             base_username = username
@@ -87,24 +85,33 @@ class RegistroView(APIView):
                 counter += 1
 
         try:
-            user, profile_type_selected = serializer.save(username=username, password=make_password(password))
+            # Guardar el usuario
+            user = serializer.save(username=username, password=make_password(password))
+
+            # Asociar un rol al perfil solo si se proporciona
+            if name_role_id:
+                rol = Rol.objects.get(pk=name_role_id)
+                perfil = Perfil.objects.create(user=user, name_role=rol)
+
+                # Verificar si el rol es "Administrador" y asignar is_superuser
+                if rol.name_role == "Administrador":
+                    user.is_superuser = True
+                    user.save()
+
             token, _ = Token.objects.get_or_create(user=user)
 
-            if profile_type_selected:
-                profile_type = ProfileType.objects.get(pk=profile_type_selected)
-                Profile.objects.create(user=user, profile_type=profile_type)
-
+            # Serializar los datos de usuario para la respuesta
             user_serialized = UserSerializer(user).data
             user_serialized['token'] = str(token.key)
-            user_serialized['profile_type'] = profile_type_selected
+            user_serialized['role'] = name_role_id
 
             return Response(user_serialized, status=status.HTTP_201_CREATED)
 
-        except ProfileType.DoesNotExist:
+        except Rol.DoesNotExist:
             return Response(
                 {
                     "error": "400 Solicitud Incorrecta",
-                    "message": f"El tipo de perfil '{profile_type_selected}' no existe.",
+                    "message": f"El rol '{name_role_id}' no existe.",
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -118,12 +125,11 @@ class RegistroView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        
 
 # Cierre de sesión de los usuarios autenticados      
 class CierreSesionView(APIView):
     authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
 
     def post(self, request):
         user = request.user
@@ -163,24 +169,23 @@ class CustomAuthToken(ObtainAuthToken):
             return Response({'error': 'Credenciales inválidas'}, status=400)
 
 
+class RolListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = Rol.objects.all()
+    serializer_class = RolSerializer
 
-# Token Authentication token:
-# https://www.django-rest-framework.org/api-guide/authentication/
+class RolDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = Rol.objects.all()
+    serializer_class = RolSerializer
 
-''''
+# Vista para CRUD de Perfiles
+class PerfilListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = Perfil.objects.all()
+    serializer_class = PerfilSerializer
 
-1. Token: 
-se utiliza para generar y almacenar tokens de autenticación para los 
-usuarios. Cada token es único y se asocia a un usuario específico.
-
-2. okenAuthentication: 
-se utiliza para autenticar las solicitudes basadas en tokens. Esta 
-clase verifica que el token proporcionado en la solicitud es válido 
-y está asociado a un usuario.
-
-3. IsAuthenticated: 
-Es un permiso que se utiliza para restringir el acceso a las vistas 
-solo a usuarios autenticados. Si un usuario no está autenticado, no podrá
-acceder a las vistas protegidas por este permiso.
-
-'''
+class PerfilDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = Perfil.objects.all()
+    serializer_class = PerfilSerializer
