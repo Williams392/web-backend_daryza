@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from .models import Categoria, Marca, UnidadMedida, Producto
 
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'estock', 'marca', 'estado')
+    list_display = ('nombre', 'estock', 'marca', 'estado', 'created_at', 'mostrar_imagen')
 
 
 class CategoriaAdmin(admin.ModelAdmin):

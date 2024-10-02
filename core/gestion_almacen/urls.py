@@ -10,6 +10,6 @@ router.register(r'unidadesmedida', UnidadMedidaViewSet)
 urlpatterns = [
     path('', include(router.urls)),
 
-     path('productos/', ProductoView.as_view(), name='producto-list'),  # Listar y crear productos
-    path('producto/<int:pk_producto>/', ProductoView.as_view(), name='producto-detail'),  # Detalles, actualizar y eliminar un producto
-]
+    path('productos/', ProductoView.as_view(), name='producto-list'),  # Listar y crear productos
+    path('productos/<int:pk_producto>/', ProductoView.as_view(), name='producto-detail'),  # Detalles, actualizar y eliminar un producto
+] 

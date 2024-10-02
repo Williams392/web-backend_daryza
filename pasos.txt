@@ -157,6 +157,7 @@ también se eliminarán todos los objetos que dependen de él.
 Cuando se utiliza PROTECT, si el objeto relacionado es eliminado,
 se producirá una excepción IntegrityError.
 
+
 5. Modelos en Django: Relaciones entre modelos.
 https://cursa.app/es/pagina/modelos-en-django-relaciones-entre-modelos#:~:text=Hay%20tres%20tipos%20principales%20de,tipos%20de%20relaciones%20entre%20datos.
 
@@ -172,6 +173,10 @@ En un campo de un serializer indica que el campo solo debe ser utilizado
 para lectura, es decir, para mostrar datos en las respuestas, pero no 
 debe ser incluido en las solicitudes para crear o actualizar instancias.
 
+3. blank=True: 
+    Esta campo no es obligatorio en el form
+4. null=True:
+    Puede aver productos que no necesitan una imagen.
 
 _ Authentication con django - token:
 

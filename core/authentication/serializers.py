@@ -20,9 +20,9 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         roles = validated_data.pop('roles', [])
-        user = super().create(validated_data)
+        user = CustomUser.objects.create_user(**validated_data)  # Crear usuario con método especializado
         if roles:
-            user.roles.set(roles)  # Asignar roles solo si existen
+            user.roles.set(roles)  # Asignar roles si existen
         return user
 
 class RolSerializer(serializers.ModelSerializer):

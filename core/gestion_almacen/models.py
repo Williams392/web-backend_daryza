@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.html import format_html
 
 class Categoria(models.Model):
     id_categoria = models.AutoField(primary_key=True)
@@ -41,7 +42,8 @@ class Producto(models.Model):
     descripcion = models.TextField(blank=True, null=True)
     estock = models.IntegerField()
     estock_minimo = models.IntegerField()
-
+    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
+    
     marca = models.ForeignKey(Marca, on_delete=models.PROTECT)
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     unidad_medida = models.ForeignKey(UnidadMedida, on_delete=models.PROTECT)
@@ -50,3 +52,13 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.nombre}"
+    
+    def mostrar_imagen(self): 
+        if self.imagen:
+            return format_html('<img src="{}" width="100" height="100" />'.format(self.imagen.url))
+        else:
+            return ''
+        
+    mostrar_imagen.short_description = 'Imagen' # dar un titulo ala tabla
+
+    

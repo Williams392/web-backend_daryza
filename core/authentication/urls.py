@@ -11,6 +11,10 @@ urlpatterns = [
     path('roles/<int:pk>/', RolDetailView.as_view(), name='roles-detail'),
     path('perfiles/', PerfilListCreateView.as_view(), name='perfiles-list-create'),
     path('perfiles/<int:pk>/', PerfilDetailView.as_view(), name='perfiles-detail'),
+
+    # CRUD para Usuarios
+    path('users/', UserListCreateView.as_view(), name='users-list-create'),
+    path('users/<int:pk>/', UserDetailView.as_view(), name='users-detail'),
 ]
 
 # signup: inscribirse

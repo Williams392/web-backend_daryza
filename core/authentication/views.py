@@ -19,8 +19,13 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAdmin
 
+from rest_framework.permissions import AllowAny  # Importar AllowAny para permitir el acceso sin autenticación
+
+
 # Inicio de sesión
 class InicioSesionView(APIView):
+    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
+
     def post(self, request):
         email = request.data.get("email")
         password = request.data.get("password")
@@ -41,16 +46,21 @@ class InicioSesionView(APIView):
 
         try:
             perfil = Perfil.objects.get(user=user)
-            
+
             # Verificar si el usuario tiene el rol de Administrador y asignar superuser
             if perfil.name_role.name_role == "Administrador":
                 user.is_superuser = True
                 user.save()
             
+            # Generar o recuperar el token para el usuario
             token, _ = Token.objects.get_or_create(user=user)
+
             user_serializer = UserSerializer(user)
             user_data = dict(user_serializer.data)
-            user_data['token'] = str(token.key)
+            user_data['token'] = str(token.key)  # Añadir el token a los datos del usuario
+            #user_data['role'] = perfil.name_role.id  # Añadir el rol del perfil
+            user_data['role'] = perfil.name_role.name_role
+
             return Response(user_data, status=status.HTTP_200_OK)
         
         except Perfil.DoesNotExist:
@@ -60,9 +70,9 @@ class InicioSesionView(APIView):
             )
 
 
-
 # Registro de nuevos usuarios
 class RegistroView(APIView):
+    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
     serializer_class = UserSerializer
 
     def post(self, request):
@@ -168,7 +178,18 @@ class CustomAuthToken(ObtainAuthToken):
         else:
             return Response({'error': 'Credenciales inválidas'}, status=400)
 
+# Vista para el CRUD de Usuarios
+class UserListCreateView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]  # Solo los administradores pueden gestionar usuarios
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
 
+class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated, IsAdmin]
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+
+# Todo de roles y permisos
 class RolListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
     queryset = Rol.objects.all()
