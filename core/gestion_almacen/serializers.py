@@ -22,17 +22,15 @@ class ProductoSerializer(serializers.ModelSerializer):
         model = Producto
         fields = '__all__'
 
-    def validate_precio_compra(self, value):
-        if value < 0:
-            raise serializers.ValidationError("El precio de compra no puede ser negativo.")
-        return value
+    def validate(self, data):
+        print("Validando datos:", data)  # Imprimir los datos que se están validando
 
-    def validate_precio_venta(self, value):
-        if value < 0:
-            raise serializers.ValidationError("El precio de venta no puede ser negativo.")
-        return value
+        if data['precio_venta'] <= data['precio_compra']: 
+            print("Error: El precio de compra debe ser mayor que el precio de venta.")
+            raise serializers.ValidationError("El precio de compra debe ser mayor que el precio de venta.")
 
-    def validate_estock(self, value):
-        if value < 0:
-            raise serializers.ValidationError("El stock no puede ser negativo.")
-        return value
+        if data['estock'] <= data['estock_minimo']:
+            print("Error: El estock debe ser mayor que el estock mínimo y no pueden ser iguales.")
+            raise serializers.ValidationError("El estock debe ser mayor que el estock mínimo y no pueden ser iguales.")
+            
+        return data

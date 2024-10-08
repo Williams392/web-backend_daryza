@@ -1,5 +1,5 @@
-from .serializers import LoginSerializer, UserSerializer, RolSerializer, PerfilSerializer
-from .models import CustomUser, Rol, Perfil
+from .serializers import LoginSerializer, UserSerializer, RolSerializer
+from .models import CustomUser, Rol
 from rest_framework import generics
 
 from datetime import datetime
@@ -45,25 +45,30 @@ class InicioSesionView(APIView):
             )
 
         try:
-            perfil = Perfil.objects.get(user=user)
+            # Aquí se utiliza directamente el campo name_role del usuario autenticado
+            name_role = user.name_role
 
             # Verificar si el usuario tiene el rol de Administrador y asignar superuser
-            if perfil.name_role.name_role == "Administrador":
+            if name_role and name_role.name_role == "Administrador":
                 user.is_superuser = True
                 user.save()
-            
+
             # Generar o recuperar el token para el usuario
             token, _ = Token.objects.get_or_create(user=user)
 
             user_serializer = UserSerializer(user)
             user_data = dict(user_serializer.data)
             user_data['token'] = str(token.key)  # Añadir el token a los datos del usuario
-            #user_data['role'] = perfil.name_role.id  # Añadir el rol del perfil
-            user_data['role'] = perfil.name_role.name_role
+            
+            # Comprobar que name_role es un objeto Rol antes de acceder a sus atributos
+            if isinstance(name_role, Rol):
+                user_data['role'] = name_role.name_role  # Usar directamente name_role
+            else:
+                user_data['role'] = None  # O asignar un valor predeterminado
 
             return Response(user_data, status=status.HTTP_200_OK)
         
-        except Perfil.DoesNotExist:
+        except Rol.DoesNotExist:
             return Response(
                 {"code": 301, "msg": "El usuario no tiene un perfil, crea una cuenta primero."},
                 status=status.HTTP_301_MOVED_PERMANENTLY
@@ -71,22 +76,44 @@ class InicioSesionView(APIView):
 
 
 # Registro de nuevos usuarios
-class RegistroView(APIView):
-    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
+class UserView(APIView):
+    permission_classes = [AllowAny]
     serializer_class = UserSerializer
+
+    def get(self, request):
+        users = CustomUser.objects.all()
+        serializer = self.serializer_class(users, many=True)
+        return Response(serializer.data)
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        first_name = serializer.validated_data['first_name']
+        username = serializer.validated_data['username']
         last_name = serializer.validated_data['last_name']
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
-        name_role_id = request.data.get('name_role', None)  # Obtener el rol si está presente
+        phone_number = serializer.validated_data['phone_number']
 
-        # Generar un nombre de usuario único
-        username = f"{first_name.lower()}_{last_name.lower()}"
+        default_role_id = 1
+        if not Rol.objects.filter(pk=default_role_id).exists():
+            return Response(
+                {
+                    "error": "400 Solicitud Incorrecta",
+                    "message": f"El rol '{default_role_id}' no existe.",
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if CustomUser.objects.filter(email=email).exists():
+            return Response(
+                {
+                    "error": "400 Solicitud Incorrecta",
+                    "message": f"El correo '{email}' ya está registrado.",
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         if CustomUser.objects.filter(username=username).exists():
             base_username = username
             counter = 1
@@ -95,25 +122,21 @@ class RegistroView(APIView):
                 counter += 1
 
         try:
-            # Guardar el usuario
-            user = serializer.save(username=username, password=make_password(password))
-
-            # Asociar un rol al perfil solo si se proporciona
-            if name_role_id:
-                rol = Rol.objects.get(pk=name_role_id)
-                perfil = Perfil.objects.create(user=user, name_role=rol)
-
-                # Verificar si el rol es "Administrador" y asignar is_superuser
-                if rol.name_role == "Administrador":
-                    user.is_superuser = True
-                    user.save()
+            user = CustomUser(
+                username=username,
+                email=email,
+                phone_number=phone_number,
+                last_name=last_name,
+                password=make_password(password),
+                name_role_id=default_role_id
+            )
+            user.save()
 
             token, _ = Token.objects.get_or_create(user=user)
 
-            # Serializar los datos de usuario para la respuesta
             user_serialized = UserSerializer(user).data
             user_serialized['token'] = str(token.key)
-            user_serialized['role'] = name_role_id
+            user_serialized['role'] = default_role_id
 
             return Response(user_serialized, status=status.HTTP_201_CREATED)
 
@@ -121,7 +144,7 @@ class RegistroView(APIView):
             return Response(
                 {
                     "error": "400 Solicitud Incorrecta",
-                    "message": f"El rol '{name_role_id}' no existe.",
+                    "message": f"El rol '{default_role_id}' no existe.",
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -134,6 +157,19 @@ class RegistroView(APIView):
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def put(self, request, pk):
+        user = CustomUser.objects.get(pk=pk)
+        serializer = self.serializer_class(user, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        user = CustomUser.objects.get(pk=pk)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 
 
 # Cierre de sesión de los usuarios autenticados      
@@ -179,15 +215,15 @@ class CustomAuthToken(ObtainAuthToken):
             return Response({'error': 'Credenciales inválidas'}, status=400)
 
 # Vista para el CRUD de Usuarios
-class UserListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsAdmin]  # Solo los administradores pueden gestionar usuarios
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+# class UserListCreateView(generics.ListCreateAPIView):
+#     permission_classes = [IsAuthenticated, IsAdmin] 
+#     queryset = CustomUser.objects.all()
+#     serializer_class = UserSerializer
 
-class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsAdmin]
-    queryset = CustomUser.objects.all()
-    serializer_class = UserSerializer
+# class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     permission_classes = [IsAuthenticated, IsAdmin]
+#     queryset = CustomUser.objects.all()
+#     serializer_class = UserSerializer
 
 # Todo de roles y permisos
 class RolListCreateView(generics.ListCreateAPIView):
@@ -201,12 +237,12 @@ class RolDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RolSerializer
 
 # Vista para CRUD de Perfiles
-class PerfilListCreateView(generics.ListCreateAPIView):
-    permission_classes = [IsAuthenticated, IsAdmin]
-    queryset = Perfil.objects.all()
-    serializer_class = PerfilSerializer
+# class PerfilListCreateView(generics.ListCreateAPIView):
+#     permission_classes = [IsAuthenticated, IsAdmin]
+#     queryset = Perfil.objects.all()
+#     serializer_class = PerfilSerializer
 
-class PerfilDetailView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated, IsAdmin]
-    queryset = Perfil.objects.all()
-    serializer_class = PerfilSerializer
+# class PerfilDetailView(generics.RetrieveUpdateDestroyAPIView):
+#     permission_classes = [IsAuthenticated, IsAdmin]
+#     queryset = Perfil.objects.all()
+#     serializer_class = PerfilSerializer

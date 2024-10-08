@@ -1,7 +1,6 @@
 from django.db import models
 from gestion_almacen.models import Producto
 
-# Create your models here.
 class Sucursal(models.Model):
     id_sucursal = models.AutoField(primary_key=True)
     nombre = models.CharField(max_length=50)
@@ -9,6 +8,9 @@ class Sucursal(models.Model):
     telf_suc = models.CharField(max_length=20)
     correo_suc = models.CharField(max_length=25)
     direccion = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre
 
 class Movimiento(models.Model):
     id_movimiento = models.AutoField(primary_key=True)
@@ -24,6 +26,9 @@ class Movimiento(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def __str__(self):
+        return self.serie
+
 class DetalleMovimiento(models.Model):
     id_detalle_movimiento = models.AutoField(primary_key=True)
     cantidad = models.IntegerField()
@@ -33,3 +38,6 @@ class DetalleMovimiento(models.Model):
 class TipoMovimiento(models.Model):
     id_tipo_movimiento = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.descripcion

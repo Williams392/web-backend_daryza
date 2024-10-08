@@ -11,6 +11,10 @@ from .serializers import CategoriaSerializer, MarcaSerializer, UnidadMedidaSeria
 
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAlmacen
+from gestion_movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
+from django.db import transaction
+from django.utils import timezone
+import uuid 
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]
@@ -59,10 +63,35 @@ class ProductoView(APIView):
             serializer = ProductoSerializer(productos, many=True)
             return Response(serializer.data)
 
+    @transaction.atomic
     def post(self, request):
         serializer = ProductoSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
+            producto = serializer.save()
+            
+            # Crear el movimiento de entrada
+            tipo_movimiento = TipoMovimiento.objects.get(descripcion='Entrada')
+            movimiento = Movimiento.objects.create(
+                serie=str(uuid.uuid4())[:7],  # Generar un valor único para serie
+                correlativo=str(uuid.uuid4())[:5],  # Generar un valor único para correlativo
+                fecha=timezone.now(),
+                fecha_entrega=timezone.now(),
+                referencia='Ingreso de productos',
+                cant_total=producto.estock,
+                sucursal_id=1,  #  sucursal
+                #usuario=request.user,  # Asumiendo que tienes un usuario autenticado
+                tipo_movimiento=tipo_movimiento,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
+            
+            # Crear el detalle del movimiento
+            DetalleMovimiento.objects.create(
+                cantidad=producto.estock,
+                producto=producto,
+                movimiento=movimiento
+            )
+            
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
