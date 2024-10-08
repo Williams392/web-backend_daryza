@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     # yo:
     'authentication',
     'gestion_almacen',
-    'gestion_movimientos',
+    'gestion_venta',
+    'movimientos',
 ]
 
 MIDDLEWARE = [

@@ -11,7 +11,7 @@ from .serializers import CategoriaSerializer, MarcaSerializer, UnidadMedidaSeria
 
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAlmacen
-from gestion_movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
+from movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
 from django.db import transaction
 from django.utils import timezone
 import uuid 
