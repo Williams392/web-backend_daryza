@@ -51,11 +51,20 @@ class UserSerializer(serializers.ModelSerializer):
         instance.last_name = validated_data.get('last_name', instance.last_name)
         instance.email = validated_data.get('email', instance.email)
         instance.phone_number = validated_data.get('phone_number', instance.phone_number)
-        
+
+        # Actualizar el rol si se proporciona
+        role_id = validated_data.get('name_role', None)  # Asegúrate de que este es el ID
+        if role_id is not None:
+            if Rol.objects.filter(pk=role_id).exists():
+                instance.name_role_id = role_id
+            else:
+                raise serializers.ValidationError({"error": "El rol no existe."})
+
         # Actualizar la contraseña solo si se proporciona
         password = validated_data.get('password', None)
         if password:
             instance.password = make_password(password)
-        
+
         instance.save()
         return instance
+
