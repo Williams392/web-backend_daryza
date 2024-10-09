@@ -80,9 +80,16 @@ class UserView(APIView):
     permission_classes = [AllowAny]
     serializer_class = UserSerializer
 
-    def get(self, request):
-        users = CustomUser.objects.all()
-        serializer = self.serializer_class(users, many=True)
+    def get(self, request, pk=None):
+        if pk:
+            try:
+                user = CustomUser.objects.get(pk=pk)
+                serializer = self.serializer_class(user)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            users = CustomUser.objects.all()
+            serializer = self.serializer_class(users, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -94,13 +101,15 @@ class UserView(APIView):
         email = serializer.validated_data['email']
         password = serializer.validated_data['password']
         phone_number = serializer.validated_data['phone_number']
+        
+        # Obtener el rol, si no se proporciona, usar el rol por defecto (1)
+        role_id = request.data.get('name_role', 1)
 
-        default_role_id = 1
-        if not Rol.objects.filter(pk=default_role_id).exists():
+        if not Rol.objects.filter(pk=role_id).exists():
             return Response(
                 {
                     "error": "400 Solicitud Incorrecta",
-                    "message": f"El rol '{default_role_id}' no existe.",
+                    "message": f"El rol '{role_id}' no existe.",
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
@@ -128,7 +137,7 @@ class UserView(APIView):
                 phone_number=phone_number,
                 last_name=last_name,
                 password=make_password(password),
-                name_role_id=default_role_id
+                name_role_id=role_id
             )
             user.save()
 
@@ -136,39 +145,50 @@ class UserView(APIView):
 
             user_serialized = UserSerializer(user).data
             user_serialized['token'] = str(token.key)
-            user_serialized['role'] = default_role_id
+            user_serialized['role'] = role_id
 
             return Response(user_serialized, status=status.HTTP_201_CREATED)
 
-        except Rol.DoesNotExist:
-            return Response(
-                {
-                    "error": "400 Solicitud Incorrecta",
-                    "message": f"El rol '{default_role_id}' no existe.",
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
         except Exception as e:
             return Response(
                 {
                     "error": "400 Solicitud Incorrecta",
-                    "message": f"El correo '{email}' ya está registrado o hubo un problema con los datos.",
+                    "message": "Hubo un problema con los datos.",
                     "details": str(e)
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
     def put(self, request, pk):
         user = CustomUser.objects.get(pk=pk)
         serializer = self.serializer_class(user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
+        
+        # Verificar si el correo electrónico ya está en uso por otro usuario
+        email = request.data.get('email')
+        if email and CustomUser.objects.filter(email=email).exclude(pk=pk).exists():
+            return Response({"error": "El correo electrónico ya está en uso."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verificar si el nombre de usuario ya está en uso por otro usuario
+        username = request.data.get('username')
+        if username and CustomUser.objects.filter(username=username).exclude(pk=pk).exists():
+            return Response({"error": "El nombre de usuario ya está en uso."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Actualizar el rol si se proporciona
+        role_id = request.data.get('name_role')
+        if role_id:
+            if Rol.objects.filter(pk=role_id).exists():
+                user.name_role_id = role_id
+            else:
+                return Response({"error": "El rol no existe."}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Guardar los cambios
         serializer.save()
         return Response(serializer.data)
 
-    def delete(self, request, pk):
-        user = CustomUser.objects.get(pk=pk)
-        user.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 
 
 
@@ -214,17 +234,6 @@ class CustomAuthToken(ObtainAuthToken):
         else:
             return Response({'error': 'Credenciales inválidas'}, status=400)
 
-# Vista para el CRUD de Usuarios
-# class UserListCreateView(generics.ListCreateAPIView):
-#     permission_classes = [IsAuthenticated, IsAdmin] 
-#     queryset = CustomUser.objects.all()
-#     serializer_class = UserSerializer
-
-# class UserDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     permission_classes = [IsAuthenticated, IsAdmin]
-#     queryset = CustomUser.objects.all()
-#     serializer_class = UserSerializer
-
 # Todo de roles y permisos
 class RolListCreateView(generics.ListCreateAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
@@ -235,14 +244,3 @@ class RolDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
     queryset = Rol.objects.all()
     serializer_class = RolSerializer
-
-# Vista para CRUD de Perfiles
-# class PerfilListCreateView(generics.ListCreateAPIView):
-#     permission_classes = [IsAuthenticated, IsAdmin]
-#     queryset = Perfil.objects.all()
-#     serializer_class = PerfilSerializer
-
-# class PerfilDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     permission_classes = [IsAuthenticated, IsAdmin]
-#     queryset = Perfil.objects.all()
-#     serializer_class = PerfilSerializer

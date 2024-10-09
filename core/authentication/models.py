@@ -10,9 +10,6 @@ class Rol(models.Model):
     
 class CustomUser(AbstractUser):
 
-    class Meta:
-        ordering = ['-id']
-
     uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=50, unique=True, null=False)
     email = models.EmailField(max_length=150, unique=True, null=False)
@@ -26,3 +23,7 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f"{self.username} - {self.email}"
+    
+
+    # class Meta:
+    #     ordering = ['-id']
