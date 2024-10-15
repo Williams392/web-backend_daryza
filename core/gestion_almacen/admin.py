@@ -3,15 +3,15 @@ from django.http import HttpResponseRedirect
 from .models import Categoria, Marca, UnidadMedida, Producto
 
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'estock', 'marca', 'estado', 'created_at', 'mostrar_imagen')
+    list_display = ('nombre_prod', 'estock', 'marca', 'estado', 'created_at', 'mostrar_imagen')
 
 
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'estado')
+    list_display = ('nombre_categoria', 'estado')
 
 
 class UnidadMedidaAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'abreviacion')
+    list_display = ('nombre_unidad', 'abreviacion')
 
 
 admin.site.register(Categoria, CategoriaAdmin)

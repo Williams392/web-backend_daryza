@@ -1,45 +1,55 @@
 from django.db import models
 from django.utils.html import format_html
+import uuid
 
 class Categoria(models.Model):
-    id_categoria = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    uuid_categoria = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    nombre_categoria = models.CharField(max_length=100)
     estado = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'tb_categoria'
+
     def __str__(self):
-        return self.nombre
+        return self.nombre_categoria
 
 class Marca(models.Model):
-    id_marca = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    uuid_marca = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    nombre_marca = models.CharField(max_length=100)
     estado = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'tb_marca'
+
     def __str__(self):
-        return self.nombre
+        return self.nombre_marca
 
 class UnidadMedida(models.Model):
-    id_unidad_medida = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    uuid_unidadMedida = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    nombre_unidad = models.CharField(max_length=100)
     abreviacion = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.nombre}"
+        return f"{self.nombre_unidad}"
+    
+    class Meta:
+        db_table = 'tb_unidadMedida'
 
 
 class Producto(models.Model):
-    id_producto = models.AutoField(primary_key=True)
-    nombre = models.CharField(max_length=100)
+    uuid_producto = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    nombre_prod = models.CharField(max_length=100)
+    descripcion_pro = models.TextField(blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
     codigo = models.CharField(max_length=100)
     estado = models.BooleanField(default=True)
-    descripcion = models.TextField(blank=True, null=True)
     estock = models.IntegerField()
     estock_minimo = models.IntegerField()
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
@@ -50,8 +60,11 @@ class Producto(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        db_table = 'tb_producto'
+
     def __str__(self):
-        return f"{self.nombre}"
+        return f"{self.nombre_prod}"
     
     def mostrar_imagen(self): 
         if self.imagen:

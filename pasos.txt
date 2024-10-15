@@ -121,14 +121,19 @@ https://drf-yasg.readthedocs.io/en/stable/readme.html#installation
 
 
 
+#---------------------------------------------------------------
+#---------------------------------------------------------------
+      		    TEST DE DJANGO con pytest-django:
+#---------------------------------------------------------------
+#---------------------------------------------------------------
 
 
-
-
-
-
-
-
+# LINK: https://pytest-django.readthedocs.io/en/latest/
+. Ejecutar el conjunto de pruebas con pytest ofrece algunas características
+que no están presentes en el mecanismo de prueba estándar de Django: Menos 
+código repetitivo: no es necesario importar unittest, crear una subclase con
+métodos. Simplemente escribir pruebas como funciones normales. Administrar 
+dependencias de pruebas con accesorios.
 
 
 #---------------------------------------------------------------

@@ -10,7 +10,7 @@ class Rol(models.Model):
     
 class CustomUser(AbstractUser):
 
-    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    uuid_user = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=50, unique=True, null=False)
     email = models.EmailField(max_length=150, unique=True, null=False)
     phone_number = models.CharField(max_length=15, null=False)

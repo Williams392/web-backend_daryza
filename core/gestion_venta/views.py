@@ -9,7 +9,7 @@ from .serializers import *
 
 class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsVentas]
-    queryset = Cliente.objects.all()
+    queryset = Emisor.objects.all()
     serializer_class = ClienteSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre', 'apellido', 'razon_social']

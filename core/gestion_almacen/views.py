@@ -21,30 +21,30 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre', 'estado']
+    filterset_fields = ['nombre_categoria', 'estado']
 
 class MarcaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre', 'estado']
+    filterset_fields = ['nombre_marca', 'estado']
 
 class UnidadMedidaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = UnidadMedida.objects.all()
     serializer_class = UnidadMedidaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre', 'abreviacion']
+    filterset_fields = ['nombre_unidad', 'abreviacion']
 
 class ProductoFilter(filters.FilterSet):
-    nombre = filters.CharFilter(lookup_expr='icontains') 
+    nombre_prod = filters.CharFilter(lookup_expr='icontains') 
     marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  
     categoria = filters.CharFilter(field_name='categoria__nombre', lookup_expr='icontains') 
 
     class Meta:
         model = Producto
-        fields = ['nombre', 'marca', 'categoria']
+        fields = ['nombre_prod', 'marca', 'categoria']
 
 class ProductoView(APIView):
     #permission_classes = [IsAuthenticated, IsAlmacen]
@@ -78,7 +78,7 @@ class ProductoView(APIView):
                 fecha_entrega=timezone.now(),
                 referencia='Ingreso de productos',
                 cant_total=producto.estock,
-                sucursal_id=1,  #  sucursal
+                #sucursal_id=1,  #  sucursal
                 #usuario=request.user,  # Asumiendo que tienes un usuario autenticado
                 tipo_movimiento=tipo_movimiento,
                 created_at=timezone.now(),

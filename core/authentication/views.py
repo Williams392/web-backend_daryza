@@ -188,10 +188,6 @@ class UserView(APIView):
         return Response(serializer.data)
 
 
-
-
-
-
 # Cierre de sesión de los usuarios autenticados      
 class CierreSesionView(APIView):
     authentication_classes = [TokenAuthentication]
