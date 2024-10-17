@@ -3,9 +3,9 @@ from django.utils.html import format_html
 import uuid
 
 class Categoria(models.Model):
-    uuid_categoria = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    id_categoria = models.AutoField(primary_key=True)
     nombre_categoria = models.CharField(max_length=100)
-    estado = models.BooleanField(default=True)
+    estado_categoria = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
@@ -16,9 +16,9 @@ class Categoria(models.Model):
         return self.nombre_categoria
 
 class Marca(models.Model):
-    uuid_marca = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    id_marca = models.AutoField(primary_key=True)
     nombre_marca = models.CharField(max_length=100)
-    estado = models.BooleanField(default=True)
+    estado_marca = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
@@ -29,7 +29,7 @@ class Marca(models.Model):
         return self.nombre_marca
 
 class UnidadMedida(models.Model):
-    uuid_unidadMedida = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    id_unidadMedida = models.AutoField(primary_key=True)
     nombre_unidad = models.CharField(max_length=100)
     abreviacion = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -43,7 +43,8 @@ class UnidadMedida(models.Model):
 
 
 class Producto(models.Model):
-    uuid_producto = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id_producto = models.AutoField(primary_key=True)
+    #uuid_producto = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     nombre_prod = models.CharField(max_length=100)
     descripcion_pro = models.TextField(blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
@@ -52,7 +53,7 @@ class Producto(models.Model):
     estado = models.BooleanField(default=True)
     estock = models.IntegerField()
     estock_minimo = models.IntegerField()
-    imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
+    imagen = models.ImageField(upload_to='productos/', null=True, blank=True)
     
     marca = models.ForeignKey(Marca, on_delete=models.PROTECT)
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)

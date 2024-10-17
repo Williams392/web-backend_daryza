@@ -1,11 +1,23 @@
-CREANDO PROYECTO DJANGO:
 
+# Comandos Rapidos:
+1.1 comando -> python -m venv menv
+1.2 comando -> source venv/Scripts/activate
+
+2. comando -> python manage.py runserver
+3. comando -> python manage.py makemigrations
+4. comando -> python manage.py migrate
+5. comando -> python manage.py createsuperuser
+6. comando -> python manage.py startapp xxxxx
+
+#---------------------------------------------------------------
+CREANDO PROYECTO DJANGO:
+#---------------------------------------------------------------
 
 _ Paso 1: creando entorno Virtual:
 
-comando-crear    -> python -m venv menv
+comando-crear    -> python -m venv venv
 comando-activar  -> menv/Scripts/activate
-comando-activar  -> source menv/Scripts/activate
+comando-activar  -> source venv/Scripts/activate
 comando-desactivar  -> deactivate
 
 #---------------------------------------------------------------
@@ -161,6 +173,11 @@ también se eliminarán todos los objetos que dependen de él.
 4. PROTECT:
 Cuando se utiliza PROTECT, si el objeto relacionado es eliminado,
 se producirá una excepción IntegrityError.
+
+5. Ejemplo en models: first_name = models.CharField(max_length=50, null=True, blank=True) 
+null=True y blank=True: Esto hace que estos campos sean opcionales tanto
+ a nivel de base de datos (null=True) como en los formularios y validaciones
+  de Django (blank=True).
 
 
 5. Modelos en Django: Relaciones entre modelos.

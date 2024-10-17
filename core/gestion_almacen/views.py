@@ -21,14 +21,14 @@ class CategoriaViewSet(viewsets.ModelViewSet):
     queryset = Categoria.objects.all()
     serializer_class = CategoriaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_categoria', 'estado']
+    filterset_fields = ['nombre_categoria', 'estado_categoria']
 
 class MarcaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = Marca.objects.all()
     serializer_class = MarcaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_marca', 'estado']
+    filterset_fields = ['nombre_marca', 'estado_marca']
 
 class UnidadMedidaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]
@@ -78,8 +78,8 @@ class ProductoView(APIView):
                 fecha_entrega=timezone.now(),
                 referencia='Ingreso de productos',
                 cant_total=producto.estock,
-                #sucursal_id=1,  #  sucursal
-                #usuario=request.user,  # Asumiendo que tienes un usuario autenticado
+                sucursal_id=1,  #  sucursal
+                usuario=request.user,  # Asumiendo que tienes un usuario autenticado
                 tipo_movimiento=tipo_movimiento,
                 created_at=timezone.now(),
                 updated_at=timezone.now()

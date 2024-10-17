@@ -9,7 +9,7 @@ class LoginSerializer(serializers.Serializer):
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rol
-        fields = ['id', 'name_role']
+        fields = ['id_rol', 'name_role']
 
 class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(required=False)
@@ -18,15 +18,19 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(required=False)  # Cambiado a False
     phone_number = serializers.CharField(required=True)
     
-    name_role = RolSerializer(read_only=True)
-    #name_role = serializers.PrimaryKeyRelatedField(queryset=Rol.objects.all(), write_only=True)
+    first_name = serializers.CharField(required=False)  # Hacer opcional
+    last_name = serializers.CharField(required=False)  # Hacer opcional
+    is_staff = serializers.BooleanField(required=False)  # Hacer opcional
+    is_active = serializers.BooleanField(required=False)  # Hacer opcional
+    is_superuser = serializers.BooleanField(required=False)  # Hacer opcional
 
+    name_role = RolSerializer(read_only=True)
 
     class Meta:
         model = CustomUser
         fields = '__all__'
         extra_kwargs = {
-            'password': {'write_only': False}  # Asegúrate de que esto esté configurado correctamente
+            'password': {'write_only': False}  # False significa q el user puede ver su contraseña encriptada. 
         }
 
     def get_name_role(self, obj):
@@ -38,6 +42,9 @@ class UserSerializer(serializers.ModelSerializer):
         # Establece un rol por defecto si no se proporciona uno
         if role_id is None:
             role_id = 1  # Asegúrate de que este ID exista en tu tabla Rol
+
+        # Encripta la contraseña antes de crear el usuario
+        validated_data['password'] = make_password(validated_data['password'])
         
         # Busca el rol por el ID proporcionado
         if not Rol.objects.filter(pk=role_id).exists():

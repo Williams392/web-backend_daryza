@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    # Por defecto:
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     
+    # Instalado:
     'rest_framework',
     'django_filters',
     'rest_framework.authtoken',
@@ -50,6 +52,7 @@ INSTALLED_APPS = [
     'gestion_almacen',
     'gestion_venta',
     'movimientos',
+    'comprobante_pago',
 ]
 
 MIDDLEWARE = [
@@ -88,13 +91,44 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# POR DEFECTO:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+
+# 2 BASE DE DATOS:
+# https://www.youtube.com/watch?v=1ylN5rhYJVA&t=196s&ab_channel=Developer.pe
+# Comando mysql: pip install psycopg2
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     },
+#     'products_db': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bd_daryza_v1',
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+# Ahora debe de ser de esta forma: python manage.py migrate --database=secondary
+# DATABASE_ROUTERS = ['core.db_routers.AuthRouter']
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bd_daryza_v1',
+        'USER': 'root',
+        'PASSWORD': 'root',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    },
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -138,8 +172,6 @@ REST_FRAMEWORK = {
 #     'path.to.EmailBackend',  
 #     'django.contrib.auth.backends.ModelBackend',
 # ]
-
-
 
 
 # Internationalization

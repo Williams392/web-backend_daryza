@@ -7,7 +7,7 @@ class ProductoAdmin(admin.ModelAdmin):
 
 
 class CategoriaAdmin(admin.ModelAdmin):
-    list_display = ('nombre_categoria', 'estado')
+    list_display = ('nombre_categoria', 'estado_categoria')
 
 
 class UnidadMedidaAdmin(admin.ModelAdmin):
