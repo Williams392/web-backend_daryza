@@ -14,9 +14,8 @@ class Sucursal(models.Model):
     def __str__(self):
         return self.nombre
     
-class TipoMovimiento(models.Model):
-    id_movimiento = models.AutoField(primary_key=True)
-    uuids_tipoMov = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+class TipoMovimiento(models.Model): # Entrada oh Salida
+    id_tipoMovimiento = models.AutoField(primary_key=True)
     descripcion = models.CharField(max_length=50)
 
     def __str__(self):

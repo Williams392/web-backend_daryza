@@ -50,3 +50,8 @@ INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, created_at, update_at) 
 ('Paquete', 'paq', NOW(), NOW()),
 ('Caja', 'caja', NOW(), NOW()),
 ('Botella', 'bot', NOW(), NOW());
+
+INSERT INTO tb_tipoMovimiento (descripcion) VALUES
+('Entrada'),
+('Salida');
+-- select * from tb_tipoMovimiento
