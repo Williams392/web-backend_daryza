@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'rest_framework.authtoken',
+    'drf_yasg',
     'corsheaders', # 1. Para activar angular con django. ( pip install django-cors-headers )
 
     # yo:
