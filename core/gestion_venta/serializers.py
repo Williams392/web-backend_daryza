@@ -1,7 +1,6 @@
 # gestion_ventas/serializers.py
 from rest_framework import serializers
 from .models import *
-from num2words import num2words
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,6 +22,7 @@ class FormaPagoSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormaPago
         fields = ['id_formaPago', 'tipo', 'monto', 'cuota', 'fecha_pago']
+
 
 class DetalleComprobanteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -47,6 +47,24 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                   'monto_Imp_Venta', 'estado_Documento', 'manual', 
                   'detalle', 'forma_pago', 'legend_comprobante']
 
+    def validate(self, data):
+        # Validar la serie dependiendo del tipo de documento
+        if data['tipo_doc'] == "01" and not data['numero_serie'].startswith('F001'):
+            raise serializers.ValidationError("La serie para facturas debe comenzar con F001.")
+        
+        if data['tipo_doc'] == "03" and not data['numero_serie'].startswith('B001'):
+            raise serializers.ValidationError("La serie para boletas debe comenzar con B001.")
+
+        # Validar monto máximo para boletas
+        if data['tipo_doc'] == "03" and data['monto_Imp_Venta'] > 700.00:
+            raise serializers.ValidationError("El monto máximo permitido para una boleta es S/ 700.00.")
+
+        # Validar que el cliente tenga RUC si es una factura
+        if data['tipo_doc'] == "01" and data['cliente_tipo_doc'] != "6":  # 6 es el tipo de documento para RUC
+            raise serializers.ValidationError("Para facturas, el cliente debe tener RUC.")
+
+        return data
+
     def create(self, validated_data):
         # Extraer los datos anidados
         detalle_data = validated_data.pop('detalle')
@@ -67,8 +85,6 @@ class ComprobanteSerializer(serializers.ModelSerializer):
         )
 
         return comprobante
-
-
 
 # class ComprobanteSerializer(serializers.ModelSerializer):
 #     # Mantener los serializadores anidados
@@ -162,4 +178,3 @@ class ComprobanteSerializer(serializers.ModelSerializer):
 
     # def numero_a_letras(self, numero):
     #     return num2words(numero, lang='es')
-

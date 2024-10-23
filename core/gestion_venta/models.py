@@ -4,6 +4,7 @@ from gestion_almacen.models import Producto
 from authentication.models import CustomUser
 import uuid
 
+
 class Empresa(models.Model):  # EMISOR
     id_empresa = models.AutoField(primary_key=True)
     ruc_empresa = models.CharField(max_length=11, null=False, blank=True)
@@ -29,6 +30,7 @@ class Empresa(models.Model):  # EMISOR
         return f"{self.nombre_comercial} {self.ruc_empresa}"
 
 
+
 class Cliente(models.Model):  # RECEPTOR
     id_cliente = models.AutoField(primary_key=True)
     nombre_clie = models.CharField(max_length=255, null=False, blank=True)
@@ -42,6 +44,7 @@ class Cliente(models.Model):  # RECEPTOR
 
     class Meta:
         db_table = 'tb_cliente'
+
     
 class Legend(models.Model):
     id_legend = models.AutoField(primary_key=True)

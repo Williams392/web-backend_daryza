@@ -44,7 +44,6 @@ class UnidadMedida(models.Model):
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
-    #uuid_producto = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     nombre_prod = models.CharField(max_length=100)
     descripcion_pro = models.TextField(blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)

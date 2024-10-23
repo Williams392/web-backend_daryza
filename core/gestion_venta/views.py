@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 
+from num2words import num2words 
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsVentas
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,39 +13,64 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import *
 from .serializers import *
 
+# Función para convertir el monto a letras en soles
+def convertir_a_monto_letras(monto):
+    enteros = int(monto)
+    decimales = int(round((monto - enteros) * 100))
+    
+    # Convertir la parte entera del monto a palabras en español
+    parte_entera_en_letras = num2words(enteros, lang='es').upper()
+    # Crear la representación en letras con los céntimos
+    letras = f"SON {parte_entera_en_letras} CON {decimales:02d}/100 SOLES"
+    
+    return letras
 
 class ComprobanteAPIView(APIView):
+
     def get(self, request, pk=None):
         if pk:
-            comprobante = get_object_or_404(Comprobante, pk=pk)
-            serializer = ComprobanteSerializer(comprobante)
+            try:
+                comprobante = Comprobante.objects.get(uuid_comprobante=pk)
+                serializer = ComprobanteSerializer(comprobante)
+                return Response(serializer.data)
+            except Comprobante.DoesNotExist:
+                return Response({"error": "Comprobante no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         else:
             comprobantes = Comprobante.objects.all()
             serializer = ComprobanteSerializer(comprobantes, many=True)
-        return Response(serializer.data)
+            return Response(serializer.data)
 
     def post(self, request):
         comprobante_data = request.data
 
-        # Extraer y guardar 'detalle', 'forma_pago', 'legend_comprobante'
+        # Extraer y guardar 'detalle' y 'forma_pago'
         detalle_data = comprobante_data.pop('detalle')
         forma_pago_data = comprobante_data.pop('forma_pago')
-        legend_data = comprobante_data.pop('legend')
 
         detalle_serializer = DetalleComprobanteSerializer(data=detalle_data)
         forma_pago_serializer = FormaPagoSerializer(data=forma_pago_data)
-        legend_serializer = LegendSerializer(data=legend_data)
 
-        if detalle_serializer.is_valid() and forma_pago_serializer.is_valid() and legend_serializer.is_valid():
+        if detalle_serializer.is_valid() and forma_pago_serializer.is_valid():
             detalle = detalle_serializer.save()
             forma_pago = forma_pago_serializer.save()
-            legend = legend_serializer.save()
 
             # Agregar los datos de los objetos guardados al comprobante
-            comprobante_data['detalle'] = detalle_serializer.data  # Cambiar a serializer.data
-            comprobante_data['forma_pago'] = forma_pago_serializer.data  # Cambiar a serializer.data
-            comprobante_data['legend_comprobante'] = legend_serializer.data  # Cambiar a serializer.data
+            comprobante_data['detalle'] = detalle_serializer.data
+            comprobante_data['forma_pago'] = forma_pago_serializer.data
 
+            # **Aquí** es donde llamamos a convertir_a_monto_letras
+            monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
+
+            # Llamar a la función para generar el valor en letras
+            legend_value = convertir_a_monto_letras(monto_imp_venta)
+
+            # Crear el legend_comprobante usando el valor generado
+            comprobante_data['legend_comprobante'] = {
+                "legend_code": "1000",
+                "legend_value": legend_value
+            }
+
+            # Serializar y guardar el comprobante
             comprobante_serializer = ComprobanteSerializer(data=comprobante_data)
             if comprobante_serializer.is_valid():
                 comprobante = comprobante_serializer.save()
@@ -54,10 +80,9 @@ class ComprobanteAPIView(APIView):
 
         return Response({
             'detalle_errors': detalle_serializer.errors,
-            'forma_pago_errors': forma_pago_serializer.errors,
-            'legend_errors': legend_serializer.errors
+            'forma_pago_errors': forma_pago_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-
+    
     
     def put(self, request, pk):
         comprobante = get_object_or_404(Comprobante, pk=pk)
@@ -68,7 +93,7 @@ class ComprobanteAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        comprobante = get_object_or_404(Comprobante, pk=pk)
+        comprobante = get_object_or_404(Comprobante, uuid_comprobante=pk)
         comprobante.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
@@ -78,7 +103,10 @@ class ClienteViewSet(viewsets.ModelViewSet):
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_clie', 'apellido_clie', 'razon_socialCliente']
+    
+    # Asegúrate de que solo incluyes campos que existen en el modelo Cliente
+    filterset_fields = ['nombre_clie', 'apellido_clie']  # Aquí asegúrate que estos existan
+
 
 class FormaPagoViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsVentas]
@@ -99,7 +127,8 @@ class EmpresaViewSet(viewsets.ModelViewSet):
     queryset = Empresa.objects.all()
     serializer_class = EmpresaSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['ruc_empresa', 'razon_social']
+    filterset_fields = ['ruc_empresa', 'razon_social']  # Asegúrate que estos campos existan en el modelo
+
 
 # class EstadoComprobanteViewSet(viewsets.ModelViewSet):
 #     permission_classes = [IsAuthenticated, IsVentas]
@@ -114,37 +143,3 @@ class EmpresaViewSet(viewsets.ModelViewSet):
 #     serializer_class = TipoComprobanteSerializer
 #     filter_backends = [DjangoFilterBackend]
 #     filterset_fields = ['nombre_tipo']
-
-    queryset = Comprobante.objects.all()
-    serializer_class = ComprobanteSerializer
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
-        comprobante = get_object_or_404(queryset, pk=pk)
-        serializer = self.get_serializer(comprobante)
-        return Response(serializer.data)
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            comprobante = serializer.save()
-            return Response(ComprobanteSerializer(comprobante).data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def update(self, request, pk=None):
-        comprobante = self.get_object()
-        serializer = self.get_serializer(comprobante, data=request.data, partial=True)
-        if serializer.is_valid():
-            comprobante = serializer.save()
-            return Response(ComprobanteSerializer(comprobante).data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, pk=None):
-        comprobante = self.get_object()
-        comprobante.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)

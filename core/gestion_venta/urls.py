@@ -15,5 +15,6 @@ urlpatterns = [
     #path('', include(router.urls)),
 
     path('comprobantes/', ComprobanteAPIView.as_view(), name='comprobante-list'),
-    path('comprobantes/<int:pk>/', ComprobanteAPIView.as_view(), name='comprobante-detail'),
+    path('comprobantes/<str:pk>/', ComprobanteAPIView.as_view(), name='comprobante-detail'),
+    #path('comprobantes/<int:pk>/', ComprobanteAPIView.as_view(), name='comprobante-detail'),
 ]
