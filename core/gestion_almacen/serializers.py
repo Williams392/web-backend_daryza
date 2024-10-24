@@ -33,3 +33,12 @@ class ProductoSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("El estock debe ser mayor que el estock mínimo y no pueden ser iguales.")
             
         return data
+
+    def update(self, instance, validated_data):
+        # Manejo especial para el archivo de imagen, si es proporcionado
+        imagen = validated_data.pop('imagen', None)
+        if imagen:
+            instance.imagen = imagen
+        
+        # Actualiza los otros campos
+        return super().update(instance, validated_data)

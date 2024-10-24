@@ -10,7 +10,7 @@ class SucursalAdmin(admin.ModelAdmin):
 #     list_display = ('serie', 'correlativo', 'fecha', 'sucursal', 'tipo_movimiento')
 
 class MovimientoAdmin(admin.ModelAdmin):
-    list_display = ('id_movimiento', 'referencia', 'cant_total', 'created_at')
+    list_display = ('id_movimiento', 'referencia', 'cant_total', 'tipo_movimiento', 'created_at')
 
 class DetalleMovimientoAdmin(admin.ModelAdmin):
     list_display = ('movimiento', 'producto', 'cantidad')

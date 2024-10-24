@@ -72,11 +72,13 @@ class ProductoView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+    @transaction.atomic
     def put(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
-        serializer = ProductoSerializer(producto, data=request.data)
+        serializer = ProductoSerializer(producto, data=request.data, partial=True)  # partial=True permite actualización parcial
+
         if serializer.is_valid():
-            serializer.save()
+            serializer.save()  # La lógica de actualización de la imagen ya está manejada en el serializer
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

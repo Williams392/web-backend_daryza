@@ -26,10 +26,6 @@ class TipoMovimiento(models.Model): # Entrada oh Salida
 
 class Movimiento(models.Model):
     id_movimiento = models.AutoField(primary_key=True)
-    #serie = models.CharField(max_length=7, unique=True)
-    #correlativo = models.CharField(max_length=5, unique=True)
-    #fecha = models.DateField()
-    #fecha_entrega = models.DateField()
     referencia = models.CharField(max_length=50, null=True)
     cant_total = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,7 +36,7 @@ class Movimiento(models.Model):
     tipo_movimiento = models.ForeignKey(TipoMovimiento, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.serie
+        return self.referencia
 
     class Meta:
         db_table = 'tb_movimiento'
