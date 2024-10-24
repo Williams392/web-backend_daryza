@@ -26,11 +26,10 @@ class TipoMovimiento(models.Model): # Entrada oh Salida
 
 class Movimiento(models.Model):
     id_movimiento = models.AutoField(primary_key=True)
-    #uuid_movimiento = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    serie = models.CharField(max_length=7, unique=True)
-    correlativo = models.CharField(max_length=5, unique=True)
-    fecha = models.DateField()
-    fecha_entrega = models.DateField()
+    #serie = models.CharField(max_length=7, unique=True)
+    #correlativo = models.CharField(max_length=5, unique=True)
+    #fecha = models.DateField()
+    #fecha_entrega = models.DateField()
     referencia = models.CharField(max_length=50, null=True)
     cant_total = models.IntegerField()
     created_at = models.DateTimeField(auto_now_add=True)

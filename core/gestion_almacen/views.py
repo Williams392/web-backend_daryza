@@ -51,10 +51,6 @@ class ProductoView(APIView):
             # Crear el movimiento de entrada
             tipo_movimiento = TipoMovimiento.objects.get(descripcion='Entrada')
             movimiento = Movimiento.objects.create(
-                serie=str(uuid.uuid4())[:7],  # Generar un valor único para serie
-                correlativo=str(uuid.uuid4())[:5],  # Generar un valor único para correlativo
-                fecha=timezone.now(),
-                fecha_entrega=timezone.now(),
                 referencia='Ingreso de productos',
                 cant_total=producto.estock,
                 sucursal_id=1,  # Sucursal, puedes cambiar esto según tu lógica

@@ -70,13 +70,9 @@ class ComprobanteAPIView(APIView):
         # Crear el movimiento de salida
         tipo_movimiento_salida = TipoMovimiento.objects.get(descripcion='Salida')
         movimiento_salida = Movimiento.objects.create(
-            serie=str(uuid.uuid4())[:7],  # Generar un valor único para serie
-            correlativo=str(uuid.uuid4())[:5],  # Generar un valor único para correlativo
-            fecha=timezone.now(),
-            fecha_entrega=timezone.now(),
             referencia='Venta de productos',
             cant_total=cantidad,
-            sucursal_id=1,  # Cambia esto por la lógica de sucursal
+            sucursal_id=1,  
             usuario=request.user,  # Usuario que realiza la venta
             tipo_movimiento=tipo_movimiento_salida,
             created_at=timezone.now(),

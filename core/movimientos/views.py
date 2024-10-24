@@ -17,7 +17,7 @@ class MovimientoViewSet(viewsets.ModelViewSet):
     queryset = Movimiento.objects.all()
     serializer_class = MovimientoSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['fecha', 'tipo_movimiento']
+    #filterset_fields = ['fecha', 'tipo_movimiento']
 
 class DetalleMovimientoViewSet(viewsets.ModelViewSet):
     queryset = DetalleMovimiento.objects.all()

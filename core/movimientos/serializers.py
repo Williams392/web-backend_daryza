@@ -11,12 +11,24 @@ class MovimientoSerializer(serializers.ModelSerializer):
         model = Movimiento
         fields = '__all__'
 
-class DetalleMovimientoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = DetalleMovimiento
-        fields = '__all__'
 
 class TipoMovimientoSerializer(serializers.ModelSerializer):
     class Meta:
         model = TipoMovimiento
         fields = '__all__'
+
+class DetalleMovimientoSerializer(serializers.ModelSerializer):
+    # Incluir el nombre del producto relacionado
+    nombre_prod = serializers.CharField(source='producto.nombre_prod', read_only=True)
+
+    class Meta:
+        model = DetalleMovimiento
+        fields = ['id_detalleMovimiento', 'cantidad', 'nombre_prod', 'movimiento']
+
+class MovimientoSerializer(serializers.ModelSerializer):
+    # Incluir los detalles del movimiento, incluyendo el nombre del producto
+    detalles = DetalleMovimientoSerializer(source='detallemovimiento_set', many=True, read_only=True)
+
+    class Meta:
+        model = Movimiento
+        fields = ['id_movimiento', 'referencia', 'cant_total', 'created_at', 'updated_at', 'sucursal', 'usuario', 'tipo_movimiento', 'detalles']
