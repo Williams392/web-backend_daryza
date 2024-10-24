@@ -27,7 +27,7 @@ class FormaPagoSerializer(serializers.ModelSerializer):
 class DetalleComprobanteSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetalleComprobante
-        fields = ['id_detalleComprobante', 'unidad', 'cantidad', 'cod_producto', 'descripcion', 
+        fields = ['id_detalleComprobante', 'cod_producto', 'unidad', 'descripcion', 'cantidad', 
                   'monto_valorUnitario', 'igv_detalle', 'total_Impuestos',
                   'monto_Precio_Unitario', 'monto_Valor_Venta']
 

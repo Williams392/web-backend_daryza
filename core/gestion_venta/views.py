@@ -47,6 +47,31 @@ class ComprobanteAPIView(APIView):
         detalle_data = comprobante_data.pop('detalle')
         forma_pago_data = comprobante_data.pop('forma_pago')
 
+        # **Obtener el producto por el id_producto**
+        try:
+            producto = Producto.objects.get(id_producto=detalle_data['cod_producto'])
+        except Producto.DoesNotExist:
+            return Response({"error": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Asignar el nombre_prod como la descripción y la unidad_medida del producto
+        detalle_data['descripcion'] = producto.nombre_prod
+        detalle_data['unidad'] = producto.unidad_medida.abreviacion  # Unidad del producto
+        detalle_data['monto_Precio_Unitario'] = str(producto.precio_venta)  # Precio del producto
+
+        # Calcular monto_Valor_Venta = monto_Precio_Unitario * cantidad
+        cantidad = detalle_data.get('cantidad', 1)
+        monto_precio_unitario = float(detalle_data['monto_Precio_Unitario'])
+        monto_valor_venta = monto_precio_unitario * cantidad
+
+        # Actualizar el monto de valor de venta en el detalle
+        detalle_data['monto_Valor_Venta'] = "{:.2f}".format(monto_valor_venta)
+
+        # Calcular el IGV (18%) y total de impuestos
+        igv_detalle = monto_valor_venta * 0.18
+        detalle_data['igv_detalle'] = "{:.2f}".format(igv_detalle)
+        detalle_data['total_Impuestos'] = "{:.2f}".format(igv_detalle)  # Para simplificar, asumimos que solo tiene IGV
+
+        # Serializar los datos del detalle y forma de pago
         detalle_serializer = DetalleComprobanteSerializer(data=detalle_data)
         forma_pago_serializer = FormaPagoSerializer(data=forma_pago_data)
 
@@ -54,14 +79,20 @@ class ComprobanteAPIView(APIView):
             detalle = detalle_serializer.save()
             forma_pago = forma_pago_serializer.save()
 
-            # Agregar los datos de los objetos guardados al comprobante
+            # **Agregar de nuevo el detalle y forma_pago al comprobante_data**
             comprobante_data['detalle'] = detalle_serializer.data
             comprobante_data['forma_pago'] = forma_pago_serializer.data
 
-            # **Aquí** es donde llamamos a convertir_a_monto_letras
-            monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
+            # Calcular los totales del comprobante basados en el detalle
+            comprobante_data['monto_Oper_Gravadas'] = "{:.2f}".format(monto_valor_venta)  # Valor sin impuestos
+            comprobante_data['monto_Igv'] = "{:.2f}".format(igv_detalle)  # IGV
+            comprobante_data['total_impuestos'] = "{:.2f}".format(igv_detalle)  # Total de impuestos (solo IGV en este caso)
+            comprobante_data['valor_venta'] = "{:.2f}".format(monto_valor_venta)  # Valor de venta sin impuestos
+            comprobante_data['sub_Total'] = "{:.2f}".format(monto_valor_venta + igv_detalle)  # Subtotal con impuestos
+            comprobante_data['monto_Imp_Venta'] = "{:.2f}".format(monto_valor_venta + igv_detalle)  # Monto total de venta
 
-            # Llamar a la función para generar el valor en letras
+            # **Generar la leyenda de monto en letras**
+            monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
             legend_value = convertir_a_monto_letras(monto_imp_venta)
 
             # Crear el legend_comprobante usando el valor generado
@@ -76,13 +107,13 @@ class ComprobanteAPIView(APIView):
                 comprobante = comprobante_serializer.save()
                 response_serializer = ComprobanteSerializer(comprobante)
                 return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
             return Response(comprobante_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({
             'detalle_errors': detalle_serializer.errors,
             'forma_pago_errors': forma_pago_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-    
     
     def put(self, request, pk):
         comprobante = get_object_or_404(Comprobante, pk=pk)
