@@ -10,6 +10,10 @@ from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsVentas
 from django_filters.rest_framework import DjangoFilterBackend
 
+from django.db import transaction
+from django.utils import timezone
+from movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
+
 from .models import *
 from .serializers import *
 
@@ -40,6 +44,7 @@ class ComprobanteAPIView(APIView):
             serializer = ComprobanteSerializer(comprobantes, many=True)
             return Response(serializer.data)
 
+    @transaction.atomic
     def post(self, request):
         comprobante_data = request.data
 
@@ -53,13 +58,44 @@ class ComprobanteAPIView(APIView):
         except Producto.DoesNotExist:
             return Response({"error": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
+        # Verificar que haya suficiente estock
+        cantidad = detalle_data.get('cantidad', 1)
+        if producto.estock < cantidad:
+            return Response({"error": "No hay suficiente stock para el producto solicitado."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Reducir el estock del producto
+        producto.estock -= cantidad
+        producto.save()
+
+        # Crear el movimiento de salida
+        tipo_movimiento_salida = TipoMovimiento.objects.get(descripcion='Salida')
+        movimiento_salida = Movimiento.objects.create(
+            serie=str(uuid.uuid4())[:7],  # Generar un valor único para serie
+            correlativo=str(uuid.uuid4())[:5],  # Generar un valor único para correlativo
+            fecha=timezone.now(),
+            fecha_entrega=timezone.now(),
+            referencia='Venta de productos',
+            cant_total=cantidad,
+            sucursal_id=1,  # Cambia esto por la lógica de sucursal
+            usuario=request.user,  # Usuario que realiza la venta
+            tipo_movimiento=tipo_movimiento_salida,
+            created_at=timezone.now(),
+            updated_at=timezone.now()
+        )
+
+        # Crear el detalle del movimiento de salida
+        DetalleMovimiento.objects.create(
+            cantidad=cantidad,
+            producto=producto,
+            movimiento=movimiento_salida
+        )
+
         # Asignar el nombre_prod como la descripción y la unidad_medida del producto
         detalle_data['descripcion'] = producto.nombre_prod
         detalle_data['unidad'] = producto.unidad_medida.abreviacion  # Unidad del producto
         detalle_data['monto_Precio_Unitario'] = str(producto.precio_venta)  # Precio del producto
 
         # Calcular monto_Valor_Venta = monto_Precio_Unitario * cantidad
-        cantidad = detalle_data.get('cantidad', 1)
         monto_precio_unitario = float(detalle_data['monto_Precio_Unitario'])
         monto_valor_venta = monto_precio_unitario * cantidad
 
@@ -114,6 +150,7 @@ class ComprobanteAPIView(APIView):
             'detalle_errors': detalle_serializer.errors,
             'forma_pago_errors': forma_pago_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+    
     
     def put(self, request, pk):
         comprobante = get_object_or_404(Comprobante, pk=pk)

@@ -4,7 +4,7 @@ from .views import *
 
 router = DefaultRouter()
 
-#router.register(r'sucursales', SucursalViewSet)
+router.register(r'sucursales', SucursalViewSet)
 router.register(r'movimientos', MovimientoViewSet)
 router.register(r'detallemovimientos', DetalleMovimientoViewSet)
 router.register(r'tiposmovimientos', TipoMovimientoViewSet)

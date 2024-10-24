@@ -16,27 +16,6 @@ from django.db import transaction
 from django.utils import timezone
 import uuid 
 
-class CategoriaViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAlmacen]
-    queryset = Categoria.objects.all()
-    serializer_class = CategoriaSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_categoria', 'estado_categoria']
-
-class MarcaViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAlmacen]
-    queryset = Marca.objects.all()
-    serializer_class = MarcaSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_marca', 'estado_marca']
-
-class UnidadMedidaViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAlmacen]
-    queryset = UnidadMedida.objects.all()
-    serializer_class = UnidadMedidaSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre_unidad', 'abreviacion']
-
 class ProductoFilter(filters.FilterSet):
     nombre_prod = filters.CharFilter(lookup_expr='icontains') 
     marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  
@@ -68,7 +47,7 @@ class ProductoView(APIView):
         serializer = ProductoSerializer(data=request.data)
         if serializer.is_valid():
             producto = serializer.save()
-            
+
             # Crear el movimiento de entrada
             tipo_movimiento = TipoMovimiento.objects.get(descripcion='Entrada')
             movimiento = Movimiento.objects.create(
@@ -78,23 +57,24 @@ class ProductoView(APIView):
                 fecha_entrega=timezone.now(),
                 referencia='Ingreso de productos',
                 cant_total=producto.estock,
-                sucursal_id=1,  #  sucursal
-                usuario=request.user,  # Asumiendo que tienes un usuario autenticado
+                sucursal_id=1,  # Sucursal, puedes cambiar esto según tu lógica
+                usuario=request.user,  # Usuario que crea el producto
                 tipo_movimiento=tipo_movimiento,
                 created_at=timezone.now(),
                 updated_at=timezone.now()
             )
-            
+
             # Crear el detalle del movimiento
             DetalleMovimiento.objects.create(
                 cantidad=producto.estock,
                 producto=producto,
                 movimiento=movimiento
             )
-            
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
     def put(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
@@ -110,3 +90,26 @@ class ProductoView(APIView):
         producto.delete()
         return Response({"msg": f"Producto con ID {pk_producto} ha sido eliminado"})
     
+
+
+
+class CategoriaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre_categoria', 'estado_categoria']
+
+class MarcaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
+    queryset = Marca.objects.all()
+    serializer_class = MarcaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre_marca', 'estado_marca']
+
+class UnidadMedidaViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsAlmacen]
+    queryset = UnidadMedida.objects.all()
+    serializer_class = UnidadMedidaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre_unidad', 'abreviacion']

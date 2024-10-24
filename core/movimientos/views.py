@@ -13,12 +13,6 @@ class SucursalViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre']
 
-# class MovimientoViewSet(viewsets.ModelViewSet):
-#     queryset = Movimiento.objects.all()
-#     serializer_class = MovimientoSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['fecha', 'sucursal', 'tipo_movimiento']
-
 class MovimientoViewSet(viewsets.ModelViewSet):
     queryset = Movimiento.objects.all()
     serializer_class = MovimientoSerializer
@@ -36,3 +30,11 @@ class TipoMovimientoViewSet(viewsets.ModelViewSet):
     serializer_class = TipoMovimientoSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['descripcion']
+
+
+
+# class MovimientoViewSet(viewsets.ModelViewSet):
+#     queryset = Movimiento.objects.all()
+#     serializer_class = MovimientoSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['fecha', 'sucursal', 'tipo_movimiento']
