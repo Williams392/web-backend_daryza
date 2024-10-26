@@ -5,7 +5,26 @@ from .models import *
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
-        fields = '__all__'
+        fields = ['id_cliente', 'nombre_clie', 'apellido_clie', 'cliente_tipo_doc', 'cliente_numDoc', 
+                  'direccion_clie', 'razon_socialCliente', 'tipo_empresa', 
+                  'email_cliente', 'telefono_cliente']
+
+    def validate(self, data):
+        instance = self.instance
+
+        # Validar dni_cliente
+        if 'dni_cliente' in data:
+            dni_cliente = data['dni_cliente']
+            if Cliente.objects.filter(dni_cliente=dni_cliente).exclude(id_cliente=instance.id_cliente if instance else None).exists():
+                raise serializers.ValidationError({"dni_cliente": "El DNI del cliente ya existe."})
+
+        # Validar ruc_cliente
+        if 'ruc_cliente' in data:
+            ruc_cliente = data['ruc_cliente']
+            if Cliente.objects.filter(ruc_cliente=ruc_cliente).exclude(id_cliente=instance.id_cliente if instance else None).exists():
+                raise serializers.ValidationError({"ruc_cliente": "El RUC del cliente ya existe."})
+
+        return data
 
 class EmpresaSerializer(serializers.ModelSerializer):
     class Meta:

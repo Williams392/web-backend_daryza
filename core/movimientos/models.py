@@ -8,11 +8,14 @@ class Sucursal(models.Model):
     nombre = models.CharField(max_length=50)
     descripcion = models.CharField(max_length=50, null=True)
     telf_suc = models.CharField(max_length=20)
-    correo_suc = models.CharField(max_length=25)
+    correo_suc = models.CharField(max_length=150)
     direccion = models.CharField(max_length=50)
 
     def __str__(self):
         return self.nombre
+    
+    class Meta:
+        db_table = 'tb_sucursal'
     
 class TipoMovimiento(models.Model): # Entrada oh Salida
     id_tipoMovimiento = models.AutoField(primary_key=True)

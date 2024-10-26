@@ -35,9 +35,12 @@ class Cliente(models.Model):  # RECEPTOR
     id_cliente = models.AutoField(primary_key=True)
     nombre_clie = models.CharField(max_length=255, null=False, blank=True)
     apellido_clie = models.CharField(max_length=255, null=True, blank=True)
+    
+    cliente_tipo_doc = models.CharField(max_length=3)  # Aquí defines el valor por defecto
+    cliente_numDoc = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
     direccion_clie = models.CharField(max_length=255, null=True, blank=True)
-    ruc_cliente = models.CharField(max_length=11, null=True, blank=True)
     razon_socialCliente = models.CharField(max_length=255, null=True, blank=True)
+
     tipo_empresa = models.CharField(max_length=255, null=True, blank=True)
     email_cliente = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
     telefono_cliente = models.CharField(max_length=20, null=True, blank=True)
@@ -57,10 +60,9 @@ class Legend(models.Model):
 
 class FormaPago(models.Model): # contado, credito, efectivo.
     id_formaPago = models.AutoField(primary_key=True)
-    #comprobante = models.ForeignKey(Comprobante, related_name='forma_pago', on_delete=models.CASCADE)
     tipo = models.CharField(max_length=10)
-    monto = models.DecimalField(max_digits=10, decimal_places=2)
-    cuota = models.IntegerField()
+    monto = models.IntegerField(default=0)
+    cuota = models.IntegerField(default=0)
     fecha_pago = models.DateTimeField()
     class Meta:
         db_table = 'tb_forma_pago'
@@ -73,15 +75,15 @@ class DetalleComprobante(models.Model):
     cod_producto = models.CharField(max_length=10)
     descripcion = models.CharField(max_length=255)
 
-    monto_valorUnitario = models.DecimalField(max_digits=10, decimal_places=2)
-    igv_detalle = models.DecimalField(max_digits=10, decimal_places=2)
+    monto_valorUnitario = models.FloatField(default=0)
+    igv_detalle = models.FloatField(default=0)
 
     fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
     hora_emision = models.TimeField(auto_now_add=True)  # Solo la hora
 
-    total_Impuestos = models.DecimalField(max_digits=10, decimal_places=2)
-    monto_Precio_Unitario = models.DecimalField(max_digits=10, decimal_places=2)
-    monto_Valor_Venta = models.DecimalField(max_digits=10, decimal_places=2)
+    total_Impuestos = models.FloatField(default=0)
+    monto_Precio_Unitario = models.FloatField(default=0)
+    monto_Valor_Venta = models.FloatField(default=0)
 
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True) # obtener unidad
     
@@ -92,7 +94,7 @@ class DetalleComprobante(models.Model):
 class Comprobante(models.Model):
     uuid_comprobante = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
-    tipo_operacion = models.CharField(max_length=4)  # Catálogo No. 01
+    tipo_operacion = models.CharField(max_length=4)   # Catálogo No. 51
     tipo_doc = models.CharField(max_length=3)  # Boleta - Factura
     numero_serie = models.CharField(max_length=4) # maximo 4 - sunat(B001 - F001)
     correlativo = models.CharField(max_length=10) # 1
@@ -107,12 +109,12 @@ class Comprobante(models.Model):
     cliente_razon_social = models.CharField(max_length=255)
     cliente_direccion = models.TextField(max_length=255)
 
-    monto_Oper_Gravadas = models.FloatField(default=0.0)
-    monto_Igv = models.FloatField(default=0.0)
-    valor_venta = models.FloatField(default=0.0)
-    total_impuestos = models.DecimalField(max_digits=10, decimal_places=2)
-    sub_Total = models.FloatField(default=0.0)
-    monto_Imp_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=0.0)
+    monto_Oper_Gravadas = models.IntegerField(default=0)
+    monto_Igv = models.IntegerField(default=0)
+    valor_venta = models.IntegerField(default=0)
+    total_impuestos = models.IntegerField(default=0)
+    sub_Total = models.IntegerField(default=0)
+    monto_Imp_Venta = models.IntegerField(default=0)
    
     estado_Documento = models.CharField(max_length=1, default='0')  # si es 0 esta pendiente el documento, enviado, aceptado, rechazado.
     manual = models.BooleanField(default=False)  # si es false significa que el documento fue generado automaticamente por el sistema.

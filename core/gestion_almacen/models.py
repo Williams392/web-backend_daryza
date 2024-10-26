@@ -4,7 +4,7 @@ import uuid
 
 class Categoria(models.Model):
     id_categoria = models.AutoField(primary_key=True)
-    nombre_categoria = models.CharField(max_length=100)
+    nombre_categoria = models.CharField(max_length=100, unique=True)
     estado_categoria = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
@@ -17,7 +17,7 @@ class Categoria(models.Model):
 
 class Marca(models.Model):
     id_marca = models.AutoField(primary_key=True)
-    nombre_marca = models.CharField(max_length=100)
+    nombre_marca = models.CharField(max_length=100, unique=True)
     estado_marca = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
@@ -30,8 +30,8 @@ class Marca(models.Model):
 
 class UnidadMedida(models.Model):
     id_unidadMedida = models.AutoField(primary_key=True)
-    nombre_unidad = models.CharField(max_length=100)
-    abreviacion = models.CharField(max_length=100)
+    nombre_unidad = models.CharField(max_length=100, unique=True)
+    abreviacion = models.CharField(max_length=100, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 
@@ -44,7 +44,7 @@ class UnidadMedida(models.Model):
 
 class Producto(models.Model):
     id_producto = models.AutoField(primary_key=True)
-    nombre_prod = models.CharField(max_length=100)
+    nombre_prod = models.CharField(max_length=100, unique=True)
     descripcion_pro = models.TextField(blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)

@@ -16,6 +16,7 @@ class CustomUser(AbstractUser):
     id_user = models.AutoField(primary_key=True)
     #uuid_user = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     username = models.CharField(max_length=50, unique=True, null=False)
+    password = models.CharField(max_length=128, null=False)
     email = models.EmailField(max_length=150, unique=True, null=False)
     phone_number = models.CharField(max_length=15, null=False)
     created = models.DateTimeField(auto_now_add=True)

@@ -52,18 +52,18 @@ class ComprobanteAPIView(APIView):
         detalle_data = comprobante_data.pop('detalle')
         forma_pago_data = comprobante_data.pop('forma_pago')
 
-        # **Obtener el producto por el id_producto**
+        # Obtener el producto por su ID
         try:
             producto = Producto.objects.get(id_producto=detalle_data['cod_producto'])
         except Producto.DoesNotExist:
             return Response({"error": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Verificar que haya suficiente estock
+        # Verificar el stock suficiente
         cantidad = detalle_data.get('cantidad', 1)
         if producto.estock < cantidad:
             return Response({"error": "No hay suficiente stock para el producto solicitado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Reducir el estock del producto
+        # Reducir el stock del producto
         producto.estock -= cantidad
         producto.save()
 
@@ -72,8 +72,8 @@ class ComprobanteAPIView(APIView):
         movimiento_salida = Movimiento.objects.create(
             referencia='Venta de productos',
             cant_total=cantidad,
-            sucursal_id=1,  
-            usuario=request.user,  # Usuario que realiza la venta
+            sucursal_id=1,
+            usuario=request.user,
             tipo_movimiento=tipo_movimiento_salida,
             created_at=timezone.now(),
             updated_at=timezone.now()
@@ -86,22 +86,22 @@ class ComprobanteAPIView(APIView):
             movimiento=movimiento_salida
         )
 
-        # Asignar el nombre_prod como la descripción y la unidad_medida del producto
+        # Asignar el nombre del producto y la unidad de medida en el detalle
         detalle_data['descripcion'] = producto.nombre_prod
-        detalle_data['unidad'] = producto.unidad_medida.abreviacion  # Unidad del producto
-        detalle_data['monto_Precio_Unitario'] = str(producto.precio_venta)  # Precio del producto
+        detalle_data['unidad'] = producto.unidad_medida.abreviacion
 
-        # Calcular monto_Valor_Venta = monto_Precio_Unitario * cantidad
-        monto_precio_unitario = float(detalle_data['monto_Precio_Unitario'])
-        monto_valor_venta = monto_precio_unitario * cantidad
+        # Calcular monto_valorUnitario y monto_Precio_Unitario
+        detalle_data['monto_valorUnitario'] = "{:.2f}".format(producto.precio_venta)  # Precio sin IGV
+        monto_valor_unitario = float(detalle_data['monto_valorUnitario'])
+        igv_unitario = monto_valor_unitario * 0.18
+        detalle_data['monto_Precio_Unitario'] = "{:.2f}".format(monto_valor_unitario + igv_unitario)  # Precio con IGV
 
-        # Actualizar el monto de valor de venta en el detalle
+        # Calcular monto_Valor_Venta (total sin impuestos) y el IGV total
+        monto_valor_venta = monto_valor_unitario * cantidad
         detalle_data['monto_Valor_Venta'] = "{:.2f}".format(monto_valor_venta)
-
-        # Calcular el IGV (18%) y total de impuestos
         igv_detalle = monto_valor_venta * 0.18
         detalle_data['igv_detalle'] = "{:.2f}".format(igv_detalle)
-        detalle_data['total_Impuestos'] = "{:.2f}".format(igv_detalle)  # Para simplificar, asumimos que solo tiene IGV
+        detalle_data['total_Impuestos'] = "{:.2f}".format(igv_detalle)
 
         # Serializar los datos del detalle y forma de pago
         detalle_serializer = DetalleComprobanteSerializer(data=detalle_data)
@@ -111,23 +111,19 @@ class ComprobanteAPIView(APIView):
             detalle = detalle_serializer.save()
             forma_pago = forma_pago_serializer.save()
 
-            # **Agregar de nuevo el detalle y forma_pago al comprobante_data**
+            # Actualizar el comprobante con los totales calculados
             comprobante_data['detalle'] = detalle_serializer.data
             comprobante_data['forma_pago'] = forma_pago_serializer.data
+            comprobante_data['monto_Oper_Gravadas'] = "{:.2f}".format(monto_valor_venta)
+            comprobante_data['monto_Igv'] = "{:.2f}".format(igv_detalle)
+            comprobante_data['total_impuestos'] = "{:.2f}".format(igv_detalle)
+            comprobante_data['valor_venta'] = "{:.2f}".format(monto_valor_venta)
+            comprobante_data['sub_Total'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
+            comprobante_data['monto_Imp_Venta'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
 
-            # Calcular los totales del comprobante basados en el detalle
-            comprobante_data['monto_Oper_Gravadas'] = "{:.2f}".format(monto_valor_venta)  # Valor sin impuestos
-            comprobante_data['monto_Igv'] = "{:.2f}".format(igv_detalle)  # IGV
-            comprobante_data['total_impuestos'] = "{:.2f}".format(igv_detalle)  # Total de impuestos (solo IGV en este caso)
-            comprobante_data['valor_venta'] = "{:.2f}".format(monto_valor_venta)  # Valor de venta sin impuestos
-            comprobante_data['sub_Total'] = "{:.2f}".format(monto_valor_venta + igv_detalle)  # Subtotal con impuestos
-            comprobante_data['monto_Imp_Venta'] = "{:.2f}".format(monto_valor_venta + igv_detalle)  # Monto total de venta
-
-            # **Generar la leyenda de monto en letras**
+            # Generar la leyenda de monto en letras
             monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
             legend_value = convertir_a_monto_letras(monto_imp_venta)
-
-            # Crear el legend_comprobante usando el valor generado
             comprobante_data['legend_comprobante'] = {
                 "legend_code": "1000",
                 "legend_value": legend_value
@@ -146,8 +142,8 @@ class ComprobanteAPIView(APIView):
             'detalle_errors': detalle_serializer.errors,
             'forma_pago_errors': forma_pago_serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
-    
-    
+
+
     def put(self, request, pk):
         comprobante = get_object_or_404(Comprobante, pk=pk)
         serializer = ComprobanteSerializer(comprobante, data=request.data, partial=True)
