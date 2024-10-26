@@ -36,8 +36,12 @@ class Cliente(models.Model):  # RECEPTOR
     nombre_clie = models.CharField(max_length=255, null=False, blank=True)
     apellido_clie = models.CharField(max_length=255, null=True, blank=True)
     
-    cliente_tipo_doc = models.CharField(max_length=3)  # Aquí defines el valor por defecto
-    cliente_numDoc = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
+    #cliente_tipo_doc = models.CharField(max_length=3, null=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
+    dni_cliente = models.CharField(max_length=8, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
+    ruc_cliente = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto
+    
+    #cliente_numDoc = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
+    
     direccion_clie = models.CharField(max_length=255, null=True, blank=True)
     razon_socialCliente = models.CharField(max_length=255, null=True, blank=True)
 

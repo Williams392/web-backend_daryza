@@ -121,6 +121,10 @@ class ComprobanteAPIView(APIView):
             comprobante_data['sub_Total'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
             comprobante_data['monto_Imp_Venta'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
 
+            # Actualizar el monto de forma_pago con el total calculado
+            forma_pago_data['monto'] = comprobante_data['monto_Imp_Venta']
+            comprobante_data['forma_pago'] = forma_pago_data # Serializar y guardar el comprobante
+            
             # Generar la leyenda de monto en letras
             monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
             legend_value = convertir_a_monto_letras(monto_imp_venta)

@@ -5,9 +5,9 @@ from .models import *
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
-        fields = ['id_cliente', 'nombre_clie', 'apellido_clie', 'cliente_tipo_doc', 'cliente_numDoc', 
-                  'direccion_clie', 'razon_socialCliente', 'tipo_empresa', 
-                  'email_cliente', 'telefono_cliente']
+        fields = ['id_cliente', 'nombre_clie', 'apellido_clie', 
+                  'dni_cliente', 'ruc_cliente','direccion_clie', 'razon_socialCliente',
+                  'tipo_empresa', 'email_cliente', 'telefono_cliente']
 
     def validate(self, data):
         instance = self.instance
