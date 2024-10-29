@@ -1,6 +1,7 @@
 # gestion_ventas/serializers.py
 from rest_framework import serializers
 from .models import *
+from decimal import Decimal
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -31,7 +32,6 @@ class EmpresaSerializer(serializers.ModelSerializer):
         model = Empresa
         fields = '__all__'
 
-
 class LegendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legend
@@ -42,19 +42,37 @@ class FormaPagoSerializer(serializers.ModelSerializer):
         model = FormaPago
         fields = ['id_formaPago', 'tipo', 'monto', 'cuota', 'fecha_pago']
 
-
+class TwoDecimalField(serializers.DecimalField):
+    def to_representation(self, value):
+        if value is None:
+            return value
+        return float(Decimal(value).quantize(Decimal('0.00')))
+    
 class DetalleComprobanteSerializer(serializers.ModelSerializer):
+
+    monto_valorUnitario = TwoDecimalField(max_digits=10, decimal_places=2)
+    igv_detalle = TwoDecimalField(max_digits=10, decimal_places=2)
+    total_Impuestos = TwoDecimalField(max_digits=10, decimal_places=2)
+    monto_Precio_Unitario = TwoDecimalField(max_digits=10, decimal_places=2)
+    monto_Valor_Venta = TwoDecimalField(max_digits=10, decimal_places=2)
+
     class Meta:
         model = DetalleComprobante
         fields = ['id_detalleComprobante', 'cod_producto', 'unidad', 'descripcion', 'cantidad', 
                   'monto_valorUnitario', 'igv_detalle', 'total_Impuestos',
                   'monto_Precio_Unitario', 'monto_Valor_Venta']
 
-
 class ComprobanteSerializer(serializers.ModelSerializer):
-    detalle = DetalleComprobanteSerializer()
+    detalle = DetalleComprobanteSerializer(many=True)
     forma_pago = FormaPagoSerializer()
     legend_comprobante = LegendSerializer()
+
+    monto_Oper_Gravadas = TwoDecimalField(max_digits=10, decimal_places=2)
+    monto_Igv = TwoDecimalField(max_digits=10, decimal_places=2)
+    total_impuestos = TwoDecimalField(max_digits=10, decimal_places=2)
+    valor_venta = TwoDecimalField(max_digits=10, decimal_places=2)
+    sub_Total = TwoDecimalField(max_digits=10, decimal_places=2)
+    monto_Imp_Venta = TwoDecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
         model = Comprobante
@@ -65,6 +83,12 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                   'total_impuestos', 'valor_venta', 'sub_Total',
                   'monto_Imp_Venta', 'estado_Documento', 'manual', 
                   'detalle', 'forma_pago', 'legend_comprobante']
+        extra_kwargs = {
+            'monto_Igv': {'required': False},
+            'total_impuestos': {'required': False},
+            'sub_Total': {'required': False},
+            'monto_Imp_Venta': {'required': False},
+        }
 
     def validate(self, data):
         # Validar la serie dependiendo del tipo de documento
@@ -74,11 +98,9 @@ class ComprobanteSerializer(serializers.ModelSerializer):
         if data['tipo_doc'] == "03" and not data['numero_serie'].startswith('B001'):
             raise serializers.ValidationError("La serie para boletas debe comenzar con B001.")
 
-        # Validar monto máximo para boletas
         if data['tipo_doc'] == "03" and data['monto_Imp_Venta'] > 700.00:
             raise serializers.ValidationError("El monto máximo permitido para una boleta es S/ 700.00.")
 
-        # Validar que el cliente tenga RUC si es una factura
         if data['tipo_doc'] == "01" and data['cliente_tipo_doc'] != "6":  # 6 es el tipo de documento para RUC
             raise serializers.ValidationError("Para facturas, el cliente debe tener RUC.")
 
@@ -91,109 +113,18 @@ class ComprobanteSerializer(serializers.ModelSerializer):
         legend_data = validated_data.pop('legend_comprobante')
 
         # Crear los objetos anidados
-        detalle = DetalleComprobante.objects.create(**detalle_data)
         forma_pago = FormaPago.objects.create(**forma_pago_data)
         legend = Legend.objects.create(**legend_data)
 
-        # Crear el comprobante y vincular los objetos anidados
+        # Crear el comprobante sin los detalles primero
         comprobante = Comprobante.objects.create(
             **validated_data,
-            detalle=detalle,
             forma_pago=forma_pago,
             legend_comprobante=legend
         )
 
+        # Crear los detalles y asignarles el comprobante creado
+        for detalle in detalle_data:
+            DetalleComprobante.objects.create(comprobante=comprobante, **detalle)
+
         return comprobante
-
-# class ComprobanteSerializer(serializers.ModelSerializer):
-#     # Mantener los serializadores anidados
-#     detalle = DetalleComprobanteSerializer(read_only=True)
-#     forma_pago = FormaPagoSerializer(read_only=True)
-#     legend_comprobante = LegendSerializer(read_only=True)
-
-#     class Meta:
-#         model = Comprobante
-#         fields = ['uuid_comprobante', 'tipo_operacion', 'tipo_doc', 'numero_serie', 'correlativo',
-#                   'tipo_moneda', 'fecha_emision', 'empresa_ruc',
-#                   'cliente_tipo_doc', 'cliente_num_doc', 'cliente_razon_social',
-#                   'cliente_direccion', 'monto_Oper_Gravadas', 'monto_Igv', 
-#                   'total_impuestos', 'valor_venta', 'sub_Total',
-#                   'monto_Imp_Venta', 'estado_Documento', 'manual', 
-#                   'detalle', 'forma_pago', 'legend_comprobante']
-
-#     # Si quieres serializar desde un objeto con ID y obtener los detalles anidados
-#     def to_representation(self, instance):
-#         representation = super().to_representation(instance)
-#         representation['detalle'] = DetalleComprobanteSerializer(instance.detalle).data
-#         representation['forma_pago'] = FormaPagoSerializer(instance.forma_pago).data
-#         representation['legend_comprobante'] = LegendSerializer(instance.legend_comprobante).data
-#         return representation
-
-
-        
-    # def create(self, validated_data):
-    #     # Extrae los datos anidados
-    #     detalle_data = validated_data.pop('detalle')
-    #     forma_pago_data = validated_data.pop('forma_pago')
-    #     legend_comprobante_data = validated_data.pop('legend_comprobante')
-
-    #     # Comprobante sin los campos anidados
-    #     comprobante = Comprobante.objects.create(**validated_data)
-
-    #     # los objetos relacionados
-    #     DetalleComprobante.objects.create(comprobante=comprobante, **detalle_data)
-    #     FormaPago.objects.create(comprobante=comprobante, **forma_pago_data)
-    #     Legend.objects.create(comprobante=comprobante, **legend_comprobante_data)
-
-    #     return comprobante
-
-
-    # def validate(self, data):
-    #     tipo_doc = data.get('tipo_doc')
-    #     numero_serie = data.get('numero_serie')
-    #     cliente_tipo_doc = data.get('cliente_tipo_doc')
-    #     monto_Imp_Venta = data.get('monto_Imp_Venta')
-
-    #     if tipo_doc == '01':  # Factura
-    #         if not numero_serie.startswith('F'):
-    #             raise serializers.ValidationError("La serie de la factura debe comenzar con 'F'.")
-    #         if cliente_tipo_doc != '6':
-    #             raise serializers.ValidationError("El cliente debe tener RUC para facturas.")
-    #     elif tipo_doc == '03':  # Boleta de Venta
-    #         if not numero_serie.startswith('B'):
-    #             raise serializers.ValidationError("La serie de la boleta debe comenzar con 'B'.")
-    #         if monto_Imp_Venta > 700:
-    #             raise serializers.ValidationError("El monto máximo para boletas es S/ 700.00.")
-    #     else:
-    #         raise serializers.ValidationError("Tipo de documento no válido.")
-
-    #     return data
-
-    # def create(self, validated_data):
-    #     detalle_data = validated_data.pop('detalle')
-    #     forma_pago_data = validated_data.pop('forma_pago')
-    #     legend_data = validated_data.pop('legend_comprobante', [])
-        
-    #     comprobante = Comprobante.objects.create(**validated_data)
-        
-    #     for item in detalle_data:
-    #         DetalleComprobante.objects.create(comprobante=comprobante, **item)
-        
-    #     for pago in forma_pago_data:
-    #         FormaPago.objects.create(comprobante=comprobante, **pago)
-        
-    #     # Generar automáticamente el legend
-    #     total_venta = validated_data['monto_Imp_Venta']
-    #     legend_value = f"SON {self.numero_a_letras(total_venta).upper()} CON 00/100 SOLES"
-    #     legend_data.append({
-    #         'legend_code': '1000',
-    #         'legend_value': legend_value
-    #     })
-        
-    #     for legend in legend_data:
-    #         Legend.objects.create(comprobante=comprobante, **legend)
-        
-    #     return comprobante
-
-    # def numero_a_letras(self, numero):
-    #     return num2words(numero, lang='es')

@@ -65,34 +65,11 @@ class Legend(models.Model):
 class FormaPago(models.Model): # contado, credito, efectivo.
     id_formaPago = models.AutoField(primary_key=True)
     tipo = models.CharField(max_length=10)
-    monto = models.IntegerField(default=0)
+    monto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cuota = models.IntegerField(default=0)
     fecha_pago = models.DateTimeField()
     class Meta:
         db_table = 'tb_forma_pago'
-
-class DetalleComprobante(models.Model):
-    id_detalleComprobante = models.AutoField(primary_key=True)
-
-    unidad = models.CharField(max_length=6, null=False)
-    cantidad = models.PositiveIntegerField()
-    cod_producto = models.CharField(max_length=10)
-    descripcion = models.CharField(max_length=255)
-
-    monto_valorUnitario = models.FloatField(default=0)
-    igv_detalle = models.FloatField(default=0)
-
-    fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
-    hora_emision = models.TimeField(auto_now_add=True)  # Solo la hora
-
-    total_Impuestos = models.FloatField(default=0)
-    monto_Precio_Unitario = models.FloatField(default=0)
-    monto_Valor_Venta = models.FloatField(default=0)
-
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True) # obtener unidad
-    
-    class Meta:
-        db_table = 'tb_detalle_comprobante'
 
 # Boleta comienza con B001 - Factura comienza con F001
 class Comprobante(models.Model):
@@ -113,19 +90,19 @@ class Comprobante(models.Model):
     cliente_razon_social = models.CharField(max_length=255)
     cliente_direccion = models.TextField(max_length=255)
 
-    monto_Oper_Gravadas = models.IntegerField(default=0)
-    monto_Igv = models.IntegerField(default=0)
-    valor_venta = models.IntegerField(default=0)
-    total_impuestos = models.IntegerField(default=0)
-    sub_Total = models.IntegerField(default=0)
-    monto_Imp_Venta = models.IntegerField(default=0)
+    monto_Oper_Gravadas = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    monto_Igv = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    valor_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    total_impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    sub_Total = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    monto_Imp_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
    
     estado_Documento = models.CharField(max_length=1, default='0')  # si es 0 esta pendiente el documento, enviado, aceptado, rechazado.
     manual = models.BooleanField(default=False)  # si es false significa que el documento fue generado automaticamente por el sistema.
     
     forma_pago = models.ForeignKey(FormaPago, on_delete=models.CASCADE, null=True)
     legend_comprobante = models.ForeignKey(Legend, on_delete=models.CASCADE, null=True)
-    detalle = models.ForeignKey(DetalleComprobante, on_delete=models.CASCADE, null=True)
+    #detalle = models.ManyToManyField(DetalleComprobante, null=True)
 
     emisor = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True)
     receptor = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True)
@@ -135,7 +112,29 @@ class Comprobante(models.Model):
         db_table = 'tb_comprobante'
 
 
+class DetalleComprobante(models.Model):
+    id_detalleComprobante = models.AutoField(primary_key=True)
 
+    unidad = models.CharField(max_length=6, null=False)
+    cantidad = models.PositiveIntegerField()
+    cod_producto = models.CharField(max_length=10)
+    descripcion = models.CharField(max_length=255)
+
+    monto_valorUnitario = models.FloatField(default=0)
+    igv_detalle = models.FloatField(default=0)
+
+    fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
+    hora_emision = models.TimeField(auto_now_add=True)  # Solo la hora
+
+    total_Impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    monto_Precio_Unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    monto_Valor_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    comprobante = models.ForeignKey(Comprobante, related_name='detalle', on_delete=models.CASCADE, null=True)  # Relación correcta
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, null=True) # obtener unidad
+    
+    class Meta:
+        db_table = 'tb_detalle_comprobante'
 
 
 

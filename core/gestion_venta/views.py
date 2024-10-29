@@ -10,9 +10,14 @@ from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsVentas
 from django_filters.rest_framework import DjangoFilterBackend
 
+from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
+
+from rest_framework.permissions import IsAuthenticated
+from authentication.permissions import IsVentas
+from authentication.permissions import IsAdmin
 
 from .models import *
 from .serializers import *
@@ -29,7 +34,10 @@ def convertir_a_monto_letras(monto):
     
     return letras
 
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 class ComprobanteAPIView(APIView):
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     def get(self, request, pk=None):
         if pk:
@@ -48,97 +56,96 @@ class ComprobanteAPIView(APIView):
     def post(self, request):
         comprobante_data = request.data
 
-        # Extraer y guardar 'detalle' y 'forma_pago'
-        detalle_data = comprobante_data.pop('detalle')
+        detalle_data = comprobante_data.pop('detalle', [])
         forma_pago_data = comprobante_data.pop('forma_pago')
 
-        # Obtener el producto por su ID
-        try:
-            producto = Producto.objects.get(id_producto=detalle_data['cod_producto'])
-        except Producto.DoesNotExist:
-            return Response({"error": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+        monto_Oper_Gravadas = Decimal('0.00')
+        monto_Igv = Decimal('0.00')
+        total_impuestos = Decimal('0.00')
+        sub_Total = Decimal('0.00')
+        monto_Imp_Venta = Decimal('0.00')
 
-        # Verificar el stock suficiente
-        cantidad = detalle_data.get('cantidad', 1)
-        if producto.estock < cantidad:
-            return Response({"error": "No hay suficiente stock para el producto solicitado."}, status=status.HTTP_400_BAD_REQUEST)
+        for detalle in detalle_data:
+            try:
+                producto = Producto.objects.get(id_producto=detalle['cod_producto'])
+            except Producto.DoesNotExist:
+                return Response({"error": "Producto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
 
-        # Reducir el stock del producto
-        producto.estock -= cantidad
-        producto.save()
+            cantidad = detalle.get('cantidad', 1)
+            if producto.estock < cantidad:
+                return Response({"error": "No hay suficiente stock para el producto solicitado."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Crear el movimiento de salida
-        tipo_movimiento_salida = TipoMovimiento.objects.get(descripcion='Salida')
-        movimiento_salida = Movimiento.objects.create(
-            referencia='Venta de productos',
-            cant_total=cantidad,
-            sucursal_id=1,
-            usuario=request.user,
-            tipo_movimiento=tipo_movimiento_salida,
-            created_at=timezone.now(),
-            updated_at=timezone.now()
-        )
+            producto.estock -= cantidad
+            producto.save()
 
-        # Crear el detalle del movimiento de salida
-        DetalleMovimiento.objects.create(
-            cantidad=cantidad,
-            producto=producto,
-            movimiento=movimiento_salida
-        )
+            tipo_movimiento_salida = TipoMovimiento.objects.get(descripcion='Salida')
+            movimiento_salida = Movimiento.objects.create(
+                referencia='Venta de productos',
+                cant_total=cantidad,
+                sucursal_id=1,
+                usuario=request.user,
+                tipo_movimiento=tipo_movimiento_salida,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
 
-        # Asignar el nombre del producto y la unidad de medida en el detalle
-        detalle_data['descripcion'] = producto.nombre_prod
-        detalle_data['unidad'] = producto.unidad_medida.abreviacion
+            DetalleMovimiento.objects.create(
+                cantidad=cantidad,
+                producto=producto,
+                movimiento=movimiento_salida
+            )
 
-        # Calcular monto_valorUnitario y monto_Precio_Unitario
-        detalle_data['monto_valorUnitario'] = "{:.2f}".format(producto.precio_venta)  # Precio sin IGV
-        monto_valor_unitario = float(detalle_data['monto_valorUnitario'])
-        igv_unitario = monto_valor_unitario * 0.18
-        detalle_data['monto_Precio_Unitario'] = "{:.2f}".format(monto_valor_unitario + igv_unitario)  # Precio con IGV
+            detalle['descripcion'] = producto.nombre_prod
+            detalle['unidad'] = producto.unidad_medida.abreviacion
 
-        # Calcular monto_Valor_Venta (total sin impuestos) y el IGV total
-        monto_valor_venta = monto_valor_unitario * cantidad
-        detalle_data['monto_Valor_Venta'] = "{:.2f}".format(monto_valor_venta)
-        igv_detalle = monto_valor_venta * 0.18
-        detalle_data['igv_detalle'] = "{:.2f}".format(igv_detalle)
-        detalle_data['total_Impuestos'] = "{:.2f}".format(igv_detalle)
+            detalle['monto_valorUnitario'] = producto.precio_venta.quantize(Decimal('0.00'))
+            monto_valor_unitario = Decimal(detalle['monto_valorUnitario']).quantize(Decimal('0.00'))
+            igv_unitario = (monto_valor_unitario * Decimal('0.18')).quantize(Decimal('0.00'))
+            detalle['monto_Precio_Unitario'] = (monto_valor_unitario + igv_unitario).quantize(Decimal('0.00'))
 
-        # Serializar los datos del detalle y forma de pago
-        detalle_serializer = DetalleComprobanteSerializer(data=detalle_data)
+            monto_valor_venta = (monto_valor_unitario * Decimal(cantidad)).quantize(Decimal('0.00'))
+            detalle['monto_Valor_Venta'] = monto_valor_venta
+            igv_detalle = (monto_valor_venta * Decimal('0.18')).quantize(Decimal('0.00'))
+            detalle['igv_detalle'] = igv_detalle
+            detalle['total_Impuestos'] = igv_detalle
+
+            monto_Oper_Gravadas += monto_valor_venta
+            monto_Igv += igv_detalle
+            total_impuestos += igv_detalle
+            sub_Total += (monto_valor_venta + igv_detalle)
+            monto_Imp_Venta += (monto_valor_venta + igv_detalle)
+
+        detalle_serializer = DetalleComprobanteSerializer(data=detalle_data, many=True)
         forma_pago_serializer = FormaPagoSerializer(data=forma_pago_data)
 
         if detalle_serializer.is_valid() and forma_pago_serializer.is_valid():
             detalle = detalle_serializer.save()
             forma_pago = forma_pago_serializer.save()
 
-            # Actualizar el comprobante con los totales calculados
             comprobante_data['detalle'] = detalle_serializer.data
             comprobante_data['forma_pago'] = forma_pago_serializer.data
-            comprobante_data['monto_Oper_Gravadas'] = "{:.2f}".format(monto_valor_venta)
-            comprobante_data['monto_Igv'] = "{:.2f}".format(igv_detalle)
-            comprobante_data['total_impuestos'] = "{:.2f}".format(igv_detalle)
-            comprobante_data['valor_venta'] = "{:.2f}".format(monto_valor_venta)
-            comprobante_data['sub_Total'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
-            comprobante_data['monto_Imp_Venta'] = "{:.2f}".format(monto_valor_venta + igv_detalle)
+            comprobante_data['monto_Oper_Gravadas'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
+            comprobante_data['monto_Igv'] = monto_Igv.quantize(Decimal('0.00'))
+            comprobante_data['total_impuestos'] = total_impuestos.quantize(Decimal('0.00'))
+            comprobante_data['valor_venta'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
+            comprobante_data['sub_Total'] = sub_Total.quantize(Decimal('0.00'))
+            comprobante_data['monto_Imp_Venta'] = monto_Imp_Venta.quantize(Decimal('0.00'))
 
-            # Actualizar el monto de forma_pago con el total calculado
-            forma_pago_data['monto'] = comprobante_data['monto_Imp_Venta']
-            comprobante_data['forma_pago'] = forma_pago_data # Serializar y guardar el comprobante
-            
-            # Generar la leyenda de monto en letras
-            monto_imp_venta = float(comprobante_data['monto_Imp_Venta'])
-            legend_value = convertir_a_monto_letras(monto_imp_venta)
+            forma_pago_data['monto'] = monto_Imp_Venta.quantize(Decimal('0.00'))
+            comprobante_data['forma_pago'] = forma_pago_data
+
+            legend_value = convertir_a_monto_letras(monto_Imp_Venta)
             comprobante_data['legend_comprobante'] = {
                 "legend_code": "1000",
                 "legend_value": legend_value
             }
 
-            # Serializar y guardar el comprobante
             comprobante_serializer = ComprobanteSerializer(data=comprobante_data)
             if comprobante_serializer.is_valid():
                 comprobante = comprobante_serializer.save()
-                response_serializer = ComprobanteSerializer(comprobante)
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+                response_data = comprobante_serializer.data
+
+                return Response(response_data, status=status.HTTP_201_CREATED)
 
             return Response(comprobante_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -160,7 +167,7 @@ class ComprobanteAPIView(APIView):
         comprobante = get_object_or_404(Comprobante, uuid_comprobante=pk)
         comprobante.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+            
 
 class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsVentas]
@@ -192,18 +199,3 @@ class EmpresaViewSet(viewsets.ModelViewSet):
     serializer_class = EmpresaSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['ruc_empresa', 'razon_social']  # Asegúrate que estos campos existan en el modelo
-
-
-# class EstadoComprobanteViewSet(viewsets.ModelViewSet):
-#     permission_classes = [IsAuthenticated, IsVentas]
-#     queryset = EstadoComprobante.objects.all()
-#     serializer_class = EstadoComprobanteSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['nombre_estado']
-
-# class TipoComprobanteViewSet(viewsets.ModelViewSet):
-#     permission_classes = [IsAuthenticated, IsVentas]
-#     queryset = TipoComprobante.objects.all()
-#     serializer_class = TipoComprobanteSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['nombre_tipo']
