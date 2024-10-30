@@ -2,7 +2,7 @@
 # Comandos Rapidos:
 1.1 comando -> python -m venv venv
 1.2 comando -> source venv/Scripts/activate
-1.3 comando -> pip freeze > requirements.txt   ( para guardar las librerias Instalas de Python)
+1.3 comando -> pip install -r requirements.txt  ( para guardar las librerias Instalas de Python)
 
 2. comando -> python manage.py runserver
 3. comando -> python manage.py makemigrations

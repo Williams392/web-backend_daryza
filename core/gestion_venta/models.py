@@ -3,32 +3,31 @@ from django.core.validators import EmailValidator
 from gestion_almacen.models import Producto
 from authentication.models import CustomUser
 import uuid
+from decimal import Decimal
 
+# class Empresa(models.Model):  # EMISOR
+#     id_empresa = models.AutoField(primary_key=True)
+#     ruc_empresa = models.CharField(max_length=11, null=False, blank=True)
+#     razon_social = models.CharField(max_length=50, null=False)  # nombre de la empresa
+#     nombre_comercial = models.CharField(max_length=200, null=True, blank=True)
+#     tipo_empresa = models.CharField(max_length=100, null=True, blank=False)  
+#     ubigeo = models.CharField(max_length=100, null=True, blank=True)
 
-class Empresa(models.Model):  # EMISOR
-    id_empresa = models.AutoField(primary_key=True)
-    ruc_empresa = models.CharField(max_length=11, null=False, blank=True)
-    razon_social = models.CharField(max_length=50, null=False)  # nombre de la empresa
-    nombre_comercial = models.CharField(max_length=200, null=True, blank=True)
-    tipo_empresa = models.CharField(max_length=100, null=True, blank=False)  
-    ubigeo = models.CharField(max_length=100, null=True, blank=True)
+#     urbanizacion = models.CharField(max_length=200, null=True, blank=True)
+#     distrito = models.CharField(max_length=100, null=True, blank=True)
+#     departamento = models.CharField(max_length=100, null=True, blank=True)
+#     email_empresa = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
+#     telefono_emp = models.CharField(max_length=50, null=True, blank=True)
 
-    urbanizacion = models.CharField(max_length=200, null=True, blank=True)
-    distrito = models.CharField(max_length=100, null=True, blank=True)
-    departamento = models.CharField(max_length=100, null=True, blank=True)
-    email_empresa = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
-    telefono_emp = models.CharField(max_length=50, null=True, blank=True)
+#     logo = models.ImageField(upload_to='logo/', null=True, blank=True) 
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
 
-    logo = models.ImageField(upload_to='logo/', null=True, blank=True) 
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+#     class Meta:
+#         db_table = 'tb_empresa'
 
-    class Meta:
-        db_table = 'tb_empresa'
-
-    def __str__(self):
-        return f"{self.nombre_comercial} {self.ruc_empresa}"
-
+#     def __str__(self):
+#         return f"{self.nombre_comercial} {self.ruc_empresa}"
 
 
 class Cliente(models.Model):  # RECEPTOR
@@ -36,12 +35,9 @@ class Cliente(models.Model):  # RECEPTOR
     nombre_clie = models.CharField(max_length=255, null=False, blank=True)
     apellido_clie = models.CharField(max_length=255, null=True, blank=True)
     
-    #cliente_tipo_doc = models.CharField(max_length=3, null=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
+    # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
     dni_cliente = models.CharField(max_length=8, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
     ruc_cliente = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto
-    
-    #cliente_numDoc = models.CharField(max_length=11, null=True, blank=True, unique=True)  # Aquí defines el valor por defecto # 8 - DNI, 6 - RUC
-    
     direccion_clie = models.CharField(max_length=255, null=True, blank=True)
     razon_socialCliente = models.CharField(max_length=255, null=True, blank=True)
 
@@ -67,7 +63,10 @@ class FormaPago(models.Model): # contado, credito, efectivo.
     tipo = models.CharField(max_length=10)
     monto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cuota = models.IntegerField(default=0)
-    fecha_pago = models.DateTimeField()
+    fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
+    fecha_vencimiento = models.DateField(auto_now_add=True)  # Solo la fecha
+
+    #fecha_vencimiento = models.DateTimeField(default='2024-10-29T00:00:00Z')
     class Meta:
         db_table = 'tb_forma_pago'
 
@@ -78,34 +77,39 @@ class Comprobante(models.Model):
     tipo_operacion = models.CharField(max_length=4)   # Catálogo No. 51
     tipo_doc = models.CharField(max_length=3)  # Boleta - Factura
     numero_serie = models.CharField(max_length=4) # maximo 4 - sunat(B001 - F001)
-    correlativo = models.CharField(max_length=10) # 1
+    correlativo = models.CharField(max_length=25) # 1
     tipo_moneda = models.CharField(max_length=3)  # PEN - DOL
+
     fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
     hora_emision = models.TimeField(auto_now_add=True)  # Solo la hora
 
-    empresa_ruc = models.CharField(max_length=11)
+    empresa_ruc = models.CharField(max_length=11) 
+    razon_social = models.CharField(max_length=50, null=False) # 
+    nombre_comercial = models.CharField(max_length=200, null=True, blank=True)
+    #ubigeo = models.CharField(max_length=100, null=True, blank=True)
+    urbanizacion = models.CharField(max_length=200, null=True, blank=True)
+    distrito = models.CharField(max_length=100, null=True, blank=True)
+    departamento = models.CharField(max_length=100, null=True, blank=True)
+    email_empresa = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
+    telefono_emp = models.CharField(max_length=50, null=True, blank=True)
 
     cliente_tipo_doc = models.CharField(max_length=11)
-    cliente_num_doc = models.CharField(max_length=11)
-    cliente_razon_social = models.CharField(max_length=255)
-    cliente_direccion = models.TextField(max_length=255)
 
-    monto_Oper_Gravadas = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    monto_Igv = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    valor_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    total_impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    sub_Total = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
-    monto_Imp_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=0, null=True)
+    monto_Oper_Gravadas = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
+    monto_Igv = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
+    valor_venta = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
+    #total_impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
+    sub_Total = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
+    monto_Imp_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), null=True)
    
     estado_Documento = models.CharField(max_length=1, default='0')  # si es 0 esta pendiente el documento, enviado, aceptado, rechazado.
     manual = models.BooleanField(default=False)  # si es false significa que el documento fue generado automaticamente por el sistema.
-    
+    pdf_url = models.FileField(upload_to='pdfs/', null=True, blank=True)
+
     forma_pago = models.ForeignKey(FormaPago, on_delete=models.CASCADE, null=True)
     legend_comprobante = models.ForeignKey(Legend, on_delete=models.CASCADE, null=True)
-    #detalle = models.ManyToManyField(DetalleComprobante, null=True)
 
-    emisor = models.ForeignKey(Empresa, on_delete=models.CASCADE, null=True)
-    receptor = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True)
+    cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True)
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
 
     class Meta:
@@ -117,7 +121,7 @@ class DetalleComprobante(models.Model):
 
     unidad = models.CharField(max_length=6, null=False)
     cantidad = models.PositiveIntegerField()
-    cod_producto = models.CharField(max_length=10)
+    id_producto = models.CharField(max_length=10)
     descripcion = models.CharField(max_length=255)
 
     monto_valorUnitario = models.FloatField(default=0)
@@ -126,7 +130,7 @@ class DetalleComprobante(models.Model):
     fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
     hora_emision = models.TimeField(auto_now_add=True)  # Solo la hora
 
-    total_Impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    #total_Impuestos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     monto_Precio_Unitario = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     monto_Valor_Venta = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 

@@ -131,10 +131,10 @@ class ProductoFilter(filters.FilterSet):
 
     class Meta:
         model = Producto
-        fields = ['nombre_prod', 'marca', 'categoria']
+        fields = ['nombre_prod', 'codigo', 'marca', 'categoria']
 
 class ProductoView(APIView):
-    #permission_classes = [IsAuthenticated, IsAlmacen]
+    # permission_classes = [IsAuthenticated, IsAlmacen]
     # quite el permiso para el user ventas puede aceder a producto.
     
     def get(self, request, pk_producto=None):
