@@ -1,6 +1,6 @@
-# -------------------
-# codigo SQL SERVER:
-# -------------------
+-- -------------------
+-- codigo SQL SERVER:
+-- -------------------
 
 create database BD_DARYZA_T3;
 use BD_DARYZA_T3;
@@ -212,3 +212,70 @@ CREATE TABLE tb_detalleMovimiento (
 );
 
 
+
+-- -----------------------
+-- DATA INSERT SQL SERVER:
+-- -----------------------
+
+-- 1. Antes de insertar crear el super user.
+INSERT INTO tb_rol (name_role) VALUES
+('Asignar'),
+('Administrador'),
+('Ventas'),
+('Almacen');
+
+INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
+('kevin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, GETDATE(), GETDATE(), 1, 1, 1, GETDATE()),
+('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, GETDATE(), GETDATE(), 0, 0, 1, GETDATE());
+-- Actualizar la contraseña en admin django y agregar un token.
+
+INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
+('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
+
+INSERT INTO tb_categoria (nombre_categoria, estado_categoria, created_at, update_at) VALUES
+('Detergente Líquido', 1, GETDATE(), GETDATE()),
+('Desinfectante', 1, GETDATE(), GETDATE()),
+('Jabón Líquido', 1, GETDATE(), GETDATE()),
+('Lejía', 1, GETDATE(), GETDATE()),
+('Suavizante', 1, GETDATE(), GETDATE()),
+('Limpiador Multiusos', 1, GETDATE(), GETDATE()),
+('Desengrasante', 1, GETDATE(), GETDATE()),
+('Aromatizador', 1, GETDATE(), GETDATE()),
+('Cera Líquida', 1, GETDATE(), GETDATE()),
+('Lavavajillas', 1, GETDATE(), GETDATE());
+
+INSERT INTO tb_marca (nombre_marca, estado_marca, created_at, update_at) VALUES
+('Daryza', 1, GETDATE(), GETDATE()),
+('Clorox', 1, GETDATE(), GETDATE()),
+('Lysol', 1, GETDATE(), GETDATE()),
+('Mr. Clean', 1, GETDATE(), GETDATE()),
+('Fabuloso', 1, GETDATE(), GETDATE()),
+('Ajax', 1, GETDATE(), GETDATE()),
+('Pine-Sol', 1, GETDATE(), GETDATE()),
+('Windex', 1, GETDATE(), GETDATE()),
+('Scrubbing Bubbles', 1, GETDATE(), GETDATE()),
+('Seventh Generation', 1, GETDATE(), GETDATE());
+
+INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, created_at, update_at) VALUES
+('Litro', 'L', GETDATE(), GETDATE()),
+('Mililitro', 'ml', GETDATE(), GETDATE()),
+('Galón', 'gal', GETDATE(), GETDATE()),
+('Onza', 'oz', GETDATE(), GETDATE()),
+('Kilogramo', 'kg', GETDATE(), GETDATE()),
+('Gramo', 'g', GETDATE(), GETDATE()),
+('Unidad', 'u', GETDATE(), GETDATE()),
+('Paquete', 'paq', GETDATE(), GETDATE()),
+('Caja', 'caja', GETDATE(), GETDATE()),
+('Botella', 'bot', GETDATE(), GETDATE());
+
+INSERT INTO tb_tipoMovimiento (descripcion) VALUES
+('Entrada'),
+('Salida');
+-- select * from tb_tipoMovimiento
+
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, dni_cliente, ruc_cliente, direccion_clie, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente) VALUES
+('Carlos', 'Fernandez', '12345678', '20123456789', 'Av. Siempre Viva 123, Lima', 'Carlos Fernandez S.A.C.', 'Empresa Privada', 'carlos.fernandez@example.com', '+51987654321'),
+('María', 'Gomez', '87654321', '20234567890', 'Calle Los Pinos 456, Arequipa', 'María Gomez EIRL', 'Pequeña Empresa', 'maria.gomez@example.com', '+51981234567'),
+('Jorge', 'Ramirez', '23456789', '20345678901', 'Jr. Las Flores 789, Trujillo', 'JR Servicios Generales', 'Mediana Empresa', 'jorge.ramirez@example.com', '+51983456789'),
+('Lucia', 'Lopez', '34567890', '20456789012', 'Av. El Sol 135, Cusco', 'Lucia Lopez Corp.', 'Empresa Familiar', 'lucia.lopez@example.com', '+51985678901');
+-- select * from tb_cliente
