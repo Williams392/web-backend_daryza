@@ -1,6 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import *
+from .reportes_almacen import *
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriaViewSet)
@@ -13,6 +14,6 @@ urlpatterns = [
     path('productos/', ProductoView.as_view(), name='producto-list'),  # Listar y crear productos
     path('productos/<int:pk_producto>/', ProductoView.as_view(), name='producto-detail'),  # Detalles, actualizar y eliminar un producto
 
-     path('productos/descargar/pdf/', DescargarPDFView.as_view(), name='producto-descargar-pdf'),
+    path('productos/descargar/pdf/', DescargarPDFView.as_view(), name='producto-descargar-pdf'),
     path('productos/descargar/excel/', DescargarExcelView.as_view(), name='producto-descargar-excel'),
 ] 

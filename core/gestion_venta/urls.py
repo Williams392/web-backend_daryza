@@ -1,6 +1,8 @@
 # gestion_ventas/urls.py
 
 from django.urls import path, include
+from django.views.static import serve
+from django.conf import settings
 from rest_framework.routers import DefaultRouter
 from .views import *
 
@@ -14,5 +16,6 @@ urlpatterns = [
 
     path('comprobantes/', ComprobanteAPIView.as_view(), name='comprobante-list'),
     path('comprobantes/<str:pk>/', ComprobanteAPIView.as_view(), name='comprobante-detail'),
-
+    path('comprobantes/pdf/<str:pk>/', ComprobantePDFView.as_view(), name='comprobante-pdf'),
+    
 ]

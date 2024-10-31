@@ -6,11 +6,10 @@ class SucursalSerializer(serializers.ModelSerializer):
         model = Sucursal
         fields = '__all__'
 
-class MovimientoSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Movimiento
-        fields = '__all__'
-
+# class MovimientoSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Movimiento
+#         fields = '__all__'
 
 class TipoMovimientoSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,10 +22,9 @@ class DetalleMovimientoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DetalleMovimiento
-        fields = ['id_detalleMovimiento', 'cantidad', 'nombre_prod', 'movimiento']
+        fields = ['id_detalleMovimiento', 'cantidad', 'nombre_prod', 'movimiento', 'detalleComprobante']
 
 class MovimientoSerializer(serializers.ModelSerializer):
-    # Incluir los detalles del movimiento, incluyendo el nombre del producto
     detalles = DetalleMovimientoSerializer(source='detallemovimiento_set', many=True, read_only=True)
 
     class Meta:

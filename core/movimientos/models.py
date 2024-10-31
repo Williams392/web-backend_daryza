@@ -1,5 +1,6 @@
 from django.db import models
-from gestion_almacen.models import Producto
+from gestion_venta.models import DetalleComprobante
+from gestion_venta.models import Producto
 from authentication.models import CustomUser
 import uuid
 
@@ -49,6 +50,9 @@ class DetalleMovimiento(models.Model):
     cantidad = models.IntegerField()
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE)
     movimiento = models.ForeignKey(Movimiento, on_delete=models.CASCADE)
+    detalleComprobante = models.ForeignKey(DetalleComprobante, on_delete=models.CASCADE, null=True, blank=True)
 
     class Meta:
         db_table = 'tb_detalleMovimiento'
+
+

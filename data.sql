@@ -1,19 +1,24 @@
+# -------------------
+# codigo MYSQL:
+# -------------------
+
 create database bd_daryza_v1;
--- drop database bd_daryza_v1;
 USE bd_daryza_v1;
 
-INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
-('kebin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, NOW(), NOW(), TRUE, TRUE, TRUE, NOW()),
-('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, NOW(), NOW(), FALSE, FALSE, TRUE, NOW());
--- ('juan3', 'juan3@gmail.com', '+51999999993', 'admin123456', 4, NOW(), NOW(), FALSE, FALSE, TRUE, NOW());
- -- Actualizar la contraseña en admin django y agregar un token.n.
-
+-- 1. Antes de insertar crear el super user.
 INSERT INTO tb_rol (name_role) VALUES
 ('Asignar'),
 ('Administrador'),
 ('Ventas'),
 ('Almacen');
-select * from tb_rol;
+
+INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
+('kevin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, NOW(), NOW(), TRUE, TRUE, TRUE, NOW()),
+('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, NOW(), NOW(), FALSE, FALSE, TRUE, NOW());
+-- Actualizar la contraseña en admin django y agregar un token.
+ 
+INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
+('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
  
 INSERT INTO tb_categoria (nombre_categoria, estado_categoria, created_at, update_at) VALUES
 ('Detergente Líquido', TRUE, NOW(), NOW()),
@@ -54,7 +59,11 @@ INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, created_at, update_at) 
 INSERT INTO tb_tipoMovimiento (descripcion) VALUES
 ('Entrada'),
 ('Salida');
+-- select * from tb_tipoMovimiento
 
- INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
-('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
- 
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, dni_cliente, ruc_cliente, direccion_clie, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente) VALUES
+('Carlos', 'Fernandez', '12345678', '20123456789', 'Av. Siempre Viva 123, Lima', 'Carlos Fernandez S.A.C.', 'Empresa Privada', 'carlos.fernandez@example.com', '+51987654321'),
+('María', 'Gomez', '87654321', '20234567890', 'Calle Los Pinos 456, Arequipa', 'María Gomez EIRL', 'Pequeña Empresa', 'maria.gomez@example.com', '+51981234567'),
+('Jorge', 'Ramirez', '23456789', '20345678901', 'Jr. Las Flores 789, Trujillo', 'JR Servicios Generales', 'Mediana Empresa', 'jorge.ramirez@example.com', '+51983456789'),
+('Lucia', 'Lopez', '34567890', '20456789012', 'Av. El Sol 135, Cusco', 'Lucia Lopez Corp.', 'Empresa Familiar', 'lucia.lopez@example.com', '+51985678901');
+select * from tb_cliente

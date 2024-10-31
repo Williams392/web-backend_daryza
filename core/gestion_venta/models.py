@@ -5,31 +5,6 @@ from authentication.models import CustomUser
 import uuid
 from decimal import Decimal
 
-# class Empresa(models.Model):  # EMISOR
-#     id_empresa = models.AutoField(primary_key=True)
-#     ruc_empresa = models.CharField(max_length=11, null=False, blank=True)
-#     razon_social = models.CharField(max_length=50, null=False)  # nombre de la empresa
-#     nombre_comercial = models.CharField(max_length=200, null=True, blank=True)
-#     tipo_empresa = models.CharField(max_length=100, null=True, blank=False)  
-#     ubigeo = models.CharField(max_length=100, null=True, blank=True)
-
-#     urbanizacion = models.CharField(max_length=200, null=True, blank=True)
-#     distrito = models.CharField(max_length=100, null=True, blank=True)
-#     departamento = models.CharField(max_length=100, null=True, blank=True)
-#     email_empresa = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
-#     telefono_emp = models.CharField(max_length=50, null=True, blank=True)
-
-#     logo = models.ImageField(upload_to='logo/', null=True, blank=True) 
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     updated_at = models.DateTimeField(auto_now=True)
-
-#     class Meta:
-#         db_table = 'tb_empresa'
-
-#     def __str__(self):
-#         return f"{self.nombre_comercial} {self.ruc_empresa}"
-
-
 class Cliente(models.Model):  # RECEPTOR
     id_cliente = models.AutoField(primary_key=True)
     nombre_clie = models.CharField(max_length=255, null=False, blank=True)
@@ -45,6 +20,8 @@ class Cliente(models.Model):  # RECEPTOR
     email_cliente = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
     telefono_cliente = models.CharField(max_length=20, null=True, blank=True)
 
+    def __str__(self):
+        return self.nombre_clie
     class Meta:
         db_table = 'tb_cliente'
 
@@ -55,6 +32,8 @@ class Legend(models.Model):
     legend_code = models.CharField(max_length=4)
     legend_value = models.TextField()
 
+    def __str__(self):
+        return self.legend_value
     class Meta:
         db_table = 'tb_legend'
 
@@ -72,7 +51,8 @@ class FormaPago(models.Model): # contado, credito, efectivo.
 
 # Boleta comienza con B001 - Factura comienza con F001
 class Comprobante(models.Model):
-    uuid_comprobante = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
+    id_comprobante = models.AutoField(primary_key=True)
+    #uuid_comprobante = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     tipo_operacion = models.CharField(max_length=4)   # Catálogo No. 51
     tipo_doc = models.CharField(max_length=3)  # Boleta - Factura
@@ -139,12 +119,39 @@ class DetalleComprobante(models.Model):
     
     class Meta:
         db_table = 'tb_detalle_comprobante'
+        
 
 
 
 
 # Envió de Boleta y Factura:
 # https://docs.factiliza.com/apis/api-sunat-facturacion/facturas-y-boletas/envio-documento
+
+
+# class Empresa(models.Model):  # EMISOR
+#     id_empresa = models.AutoField(primary_key=True)
+#     ruc_empresa = models.CharField(max_length=11, null=False, blank=True)
+#     razon_social = models.CharField(max_length=50, null=False)  # nombre de la empresa
+#     nombre_comercial = models.CharField(max_length=200, null=True, blank=True)
+#     tipo_empresa = models.CharField(max_length=100, null=True, blank=False)  
+#     ubigeo = models.CharField(max_length=100, null=True, blank=True)
+
+#     urbanizacion = models.CharField(max_length=200, null=True, blank=True)
+#     distrito = models.CharField(max_length=100, null=True, blank=True)
+#     departamento = models.CharField(max_length=100, null=True, blank=True)
+#     email_empresa = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
+#     telefono_emp = models.CharField(max_length=50, null=True, blank=True)
+
+#     logo = models.ImageField(upload_to='logo/', null=True, blank=True) 
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
+
+#     class Meta:
+#         db_table = 'tb_empresa'
+
+#     def __str__(self):
+#         return f"{self.nombre_comercial} {self.ruc_empresa}"
+
 
 
 # No en uso:

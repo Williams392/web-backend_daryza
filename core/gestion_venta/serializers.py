@@ -2,6 +2,10 @@
 from rest_framework import serializers
 from .models import *
 from decimal import Decimal
+from django.db.models import Max, IntegerField
+from django.db.models.functions import Cast
+from .docs.pdf_generator import generar_pdf_comprobante
+from django.conf import settings
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,12 +56,6 @@ class TwoDecimalField(serializers.DecimalField):
     
 class DetalleComprobanteSerializer(serializers.ModelSerializer):
 
-    monto_valorUnitario = TwoDecimalField(max_digits=10, decimal_places=2)
-    igv_detalle = TwoDecimalField(max_digits=10, decimal_places=2)
-    #total_Impuestos = TwoDecimalField(max_digits=10, decimal_places=2)
-    monto_Precio_Unitario = TwoDecimalField(max_digits=10, decimal_places=2)
-    monto_Valor_Venta = TwoDecimalField(max_digits=10, decimal_places=2)
-
     class Meta:
         model = DetalleComprobante
         fields = ['id_detalleComprobante', 'id_producto', 'unidad', 'descripcion', 'cantidad', 
@@ -72,8 +70,8 @@ class ComprobanteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comprobante
-        fields = ['uuid_comprobante', 'tipo_operacion', 'tipo_doc', 'numero_serie', 'correlativo',
-                  'tipo_moneda', 'fecha_emision', 
+        fields = ['id_comprobante', 'tipo_operacion', 'tipo_doc', 'numero_serie', 'correlativo',
+                  'tipo_moneda', 'fecha_emision', 'hora_emision',
 
                   'empresa_ruc', 'razon_social', 'nombre_comercial', 'urbanizacion', 
                   'distrito', 'departamento', 'email_empresa', 'telefono_emp',
@@ -82,10 +80,11 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                   'monto_Oper_Gravadas', 'monto_Igv', 
                   'valor_venta', 'sub_Total',
                   'monto_Imp_Venta', 'estado_Documento', 'manual', 
-                  'detalle', 'forma_pago', 'legend_comprobante']
+                  'detalle', 'forma_pago', 'legend_comprobante', 'pdf_url']
         extra_kwargs = {
             'monto_Igv': {'required': False},
             #'total_impuestos': {'required': False},
+            'correlativo': {'required': False},
             'sub_Total': {'required': False},
             'monto_Imp_Venta': {'required': False},
             'email_empresa': {'required': False},
@@ -111,13 +110,34 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("El monto máximo permitido para una boleta es S/ 700.00.")
 
         return data
+    
+    def get_next_correlativo(self, tipo_doc):
+        """
+        Obtiene el siguiente número correlativo para el tipo de documento especificado,
+        en formato de cinco dígitos con ceros a la izquierda.
+        """
+        ultimo_comprobante = Comprobante.objects.filter(tipo_doc=tipo_doc).aggregate(
+            ultimo_correlativo=Max(Cast('correlativo', output_field=IntegerField()))
+        )
+        
+        # Si es None (no hay registros), iniciar en 1; si no, incrementar
+        ultimo_correlativo = ultimo_comprobante['ultimo_correlativo'] or 0
+        
+        # Incrementar el correlativo y formatearlo a cinco dígitos
+        nuevo_correlativo = f"{ultimo_correlativo + 1:05}"
+        
+        return nuevo_correlativo
+
 
     def create(self, validated_data):
-        
         # Extraer los datos anidados
         detalle_data = validated_data.pop('detalle')
         forma_pago_data = validated_data.pop('forma_pago')
         legend_data = validated_data.pop('legend_comprobante')
+
+        # Generar el siguiente correlativo para el tipo de documento
+        tipo_doc = validated_data.get('tipo_doc')
+        validated_data['correlativo'] = self.get_next_correlativo(tipo_doc)
 
         # Crear los objetos anidados
         forma_pago = FormaPago.objects.create(**forma_pago_data)
@@ -134,7 +154,42 @@ class ComprobanteSerializer(serializers.ModelSerializer):
         for detalle in detalle_data:
             DetalleComprobante.objects.create(comprobante=comprobante, **detalle)
 
+        # Preparar los datos para el PDF, incluyendo datos del cliente y tipo de documento
+        cliente = comprobante.cliente  # Cliente relacionado
+        comprobante_data = {
+            'tipo_doc': comprobante.tipo_doc,
+            'numero_serie': comprobante.numero_serie,
+            'correlativo': comprobante.correlativo,
+            'fecha_emision': comprobante.fecha_emision,
+            'razon_social': comprobante.razon_social,
+            'urbanizacion': comprobante.urbanizacion,
+            'distrito': comprobante.distrito,
+            'departamento': comprobante.departamento,
+            'email_empresa': comprobante.email_empresa,
+            'empresa_ruc': comprobante.empresa_ruc,
+            'cliente_tipo_doc': comprobante.cliente_tipo_doc,  # Añadido `cliente_tipo_doc`
+            'cliente': {
+                'ruc_cliente': cliente.ruc_cliente,
+                'razon_socialCliente': cliente.razon_socialCliente,
+                'direccion_clie': cliente.direccion_clie,
+                'dni_cliente': cliente.dni_cliente,
+                'nombre_clie': cliente.nombre_clie,
+                'apellido_clie': cliente.apellido_clie,
+            }
+            # ... otros datos necesarios
+        }
+
+        # Generar PDF del comprobante y obtener la ruta de salida
+        pdf_path = generar_pdf_comprobante(comprobante_data)
+
+        # Guardar la ruta relativa en `pdf_url`
+        pdf_url = pdf_path.replace(settings.MEDIA_ROOT, '')  # Ruta relativa desde MEDIA_ROOT
+        comprobante.pdf_url = pdf_url  # Asignar el valor a `pdf_url`
+        comprobante.save()  # Guardar los cambios en el comprobante
+
         return comprobante
+
+
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -147,5 +202,19 @@ class ComprobanteSerializer(serializers.ModelSerializer):
             'cliente_razon_social': cliente.razon_socialCliente or f"{cliente.nombre_clie} {cliente.apellido_clie}",
             'cliente_direccion': cliente.direccion_clie
         }
+
         return representation
 
+
+# class DetalleComprobanteSerializer(serializers.ModelSerializer):
+
+#     monto_valorUnitario = TwoDecimalField(max_digits=10, decimal_places=2)
+#     igv_detalle = TwoDecimalField(max_digits=10, decimal_places=2)
+#     monto_Precio_Unitario = TwoDecimalField(max_digits=10, decimal_places=2)
+#     monto_Valor_Venta = TwoDecimalField(max_digits=10, decimal_places=2)
+
+#     class Meta:
+#         model = DetalleComprobante
+#         fields = ['id_detalleComprobante', 'id_producto', 'unidad', 'descripcion', 'cantidad', 
+#                   'monto_valorUnitario', 'igv_detalle',
+#                   'monto_Precio_Unitario', 'monto_Valor_Venta']

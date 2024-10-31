@@ -14,14 +14,43 @@ from decimal import Decimal
 from django.db import transaction
 from django.utils import timezone
 from movimientos.models import Movimiento, DetalleMovimiento, TipoMovimiento
-#from .pdfs.pdf_generator import generar_pdf_comprobante
 
 from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsVentas
 from authentication.permissions import IsAdmin
 
+from .docs.pdf_generator import generar_pdf_comprobante
 from .models import *
 from .serializers import *
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+
+from django.http import HttpResponse, Http404
+from django.conf import settings
+from .models import Comprobante
+import os
+
+
+class ComprobantePDFView(APIView):
+    
+    def get(self, request, pk):
+        # Buscar el comprobante por ID
+        try:
+            comprobante = Comprobante.objects.get(id_comprobante=pk)
+        except Comprobante.DoesNotExist:
+            raise Http404("Comprobante no encontrado")
+
+        # Validar que exista el archivo PDF en `pdf_url`
+        pdf_path = comprobante.pdf_url.path  # Obtener la ruta absoluta
+
+        if not os.path.exists(pdf_path):
+            raise Http404("Archivo PDF no encontrado")
+        
+        # Abrir y retornar el PDF como respuesta
+        with open(pdf_path, 'rb') as pdf_file:
+            response = HttpResponse(pdf_file, content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
+            return response
+        
 
 # Función para convertir el monto a letras en soles
 def convertir_a_monto_letras(monto):
@@ -35,7 +64,7 @@ def convertir_a_monto_letras(monto):
     
     return letras
 
-from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+
 class ComprobanteAPIView(APIView):
     authentication_classes = [TokenAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated, IsAdmin]
@@ -43,7 +72,7 @@ class ComprobanteAPIView(APIView):
     def get(self, request, pk=None):
         if pk:
             try:
-                comprobante = Comprobante.objects.get(uuid_comprobante=pk)
+                comprobante = Comprobante.objects.get(id_comprobante=pk)
                 serializer = ComprobanteSerializer(comprobante)
                 return Response(serializer.data)
             except Comprobante.DoesNotExist:
@@ -70,10 +99,10 @@ class ComprobanteAPIView(APIView):
 
         monto_Oper_Gravadas = Decimal('0.00')
         monto_Igv = Decimal('0.00')
-        #total_impuestos = Decimal('0.00')
         sub_Total = Decimal('0.00')
         monto_Imp_Venta = Decimal('0.00')
 
+        # Calcular valores para cada detalle
         for detalle in detalle_data:
             try:
                 producto = Producto.objects.get(id_producto=detalle['id_producto'])
@@ -106,8 +135,8 @@ class ComprobanteAPIView(APIView):
 
             detalle['descripcion'] = producto.nombre_prod
             detalle['unidad'] = producto.unidad_medida.abreviacion
-
             detalle['monto_valorUnitario'] = producto.precio_venta.quantize(Decimal('0.00'))
+            
             monto_valor_unitario = Decimal(detalle['monto_valorUnitario']).quantize(Decimal('0.00'))
             igv_unitario = (monto_valor_unitario * Decimal('0.18')).quantize(Decimal('0.00'))
             detalle['monto_Precio_Unitario'] = (monto_valor_unitario + igv_unitario).quantize(Decimal('0.00'))
@@ -116,65 +145,45 @@ class ComprobanteAPIView(APIView):
             detalle['monto_Valor_Venta'] = monto_valor_venta
             igv_detalle = (monto_valor_venta * Decimal('0.18')).quantize(Decimal('0.00'))
             detalle['igv_detalle'] = igv_detalle
-            #detalle['total_Impuestos'] = igv_detalle
 
             monto_Oper_Gravadas += monto_valor_venta
             monto_Igv += igv_detalle
-            #total_impuestos += igv_detalle
             sub_Total += (monto_valor_venta + igv_detalle)
             monto_Imp_Venta += (monto_valor_venta + igv_detalle)
 
-        detalle_serializer = DetalleComprobanteSerializer(data=detalle_data, many=True)
-        forma_pago_serializer = FormaPagoSerializer(data=forma_pago_data)
+        comprobante_data['detalle'] = detalle_data
+        comprobante_data['forma_pago'] = forma_pago_data
+        comprobante_data['monto_Oper_Gravadas'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
+        comprobante_data['monto_Igv'] = monto_Igv.quantize(Decimal('0.00'))
+        comprobante_data['valor_venta'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
+        comprobante_data['sub_Total'] = sub_Total.quantize(Decimal('0.00'))
+        comprobante_data['monto_Imp_Venta'] = monto_Imp_Venta.quantize(Decimal('0.00'))
 
-        if detalle_serializer.is_valid() and forma_pago_serializer.is_valid():
-            detalle = detalle_serializer.save()
-            forma_pago = forma_pago_serializer.save()
+        forma_pago_data['monto'] = monto_Imp_Venta.quantize(Decimal('0.00'))
+        comprobante_data['forma_pago'] = forma_pago_data
 
-            comprobante_data['detalle'] = detalle_serializer.data
-            comprobante_data['forma_pago'] = forma_pago_serializer.data
-            comprobante_data['monto_Oper_Gravadas'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
-            comprobante_data['monto_Igv'] = monto_Igv.quantize(Decimal('0.00'))
-            #comprobante_data['total_impuestos'] = total_impuestos.quantize(Decimal('0.00'))
-            comprobante_data['valor_venta'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
-            comprobante_data['sub_Total'] = sub_Total.quantize(Decimal('0.00'))
-            comprobante_data['monto_Imp_Venta'] = monto_Imp_Venta.quantize(Decimal('0.00'))
+        legend_value = convertir_a_monto_letras(monto_Imp_Venta)
+        comprobante_data['legend_comprobante'] = {
+            "legend_code": "1000",
+            "legend_value": legend_value
+        }
 
-            forma_pago_data['monto'] = monto_Imp_Venta.quantize(Decimal('0.00'))
-            comprobante_data['forma_pago'] = forma_pago_data
+        # Crear el comprobante
+        comprobante_serializer = ComprobanteSerializer(data=comprobante_data)
+        if comprobante_serializer.is_valid():
+            comprobante = comprobante_serializer.save()
+            cliente_num_doc = cliente.ruc_cliente if comprobante.tipo_doc == "01" or comprobante.cliente_tipo_doc == "6" else cliente.dni_cliente
 
-            legend_value = convertir_a_monto_letras(monto_Imp_Venta)
-            comprobante_data['legend_comprobante'] = {
-                "legend_code": "1000",
-                "legend_value": legend_value
+            response_data = comprobante_serializer.data
+            response_data['cliente'] = {
+                'cliente_id': cliente.id_cliente,
+                'cliente_num_doc': cliente_num_doc,
+                'cliente_denominacion': f"{cliente.nombre_clie} {cliente.apellido_clie}" if comprobante.cliente_tipo_doc == "1" else cliente.razon_socialCliente,
+                'cliente_direccion': cliente.direccion_clie
             }
+            return Response(response_data, status=status.HTTP_201_CREATED)
 
-            # Crear el comprobante
-            comprobante_serializer = ComprobanteSerializer(data=comprobante_data)
-            if comprobante_serializer.is_valid():
-                comprobante = comprobante_serializer.save()
-                # Asignar cliente_num_doc según tipo_doc y cliente_tipo_doc
-                if comprobante.tipo_doc == "01":  # Factura, solo RUC
-                    cliente_num_doc = cliente.ruc_cliente
-                elif comprobante.tipo_doc == "03":  # Boleta
-                    cliente_num_doc = cliente.ruc_cliente if comprobante.cliente_tipo_doc == "6" else cliente.dni_cliente
-
-                # Construir la respuesta con los datos del cliente
-                response_data = comprobante_serializer.data
-                response_data['cliente'] = {
-                    'cliente_id': cliente.id_cliente,
-                    'cliente_num_doc': cliente_num_doc,
-                    'cliente_denominacion': f"{cliente.nombre_clie} {cliente.apellido_clie}" if comprobante.cliente_tipo_doc == "1" else cliente.razon_socialCliente,
-                    'cliente_direccion': cliente.direccion_clie
-                }
-                return Response(response_data, status=status.HTTP_201_CREATED)
-                
-            return Response(comprobante_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        return Response({
-            'detalle_errors': detalle_serializer.errors,
-            'forma_pago_errors': forma_pago_serializer.errors
-        }, status=status.HTTP_400_BAD_REQUEST)
+        return Response(comprobante_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
     def put(self, request, pk):
@@ -186,7 +195,7 @@ class ComprobanteAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk):
-        comprobante = get_object_or_404(Comprobante, uuid_comprobante=pk)
+        comprobante = get_object_or_404(Comprobante, id_comprobante=pk)
         comprobante.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
             
