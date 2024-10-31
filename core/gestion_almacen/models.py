@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 from django.utils.html import format_html
 import uuid
 
@@ -14,6 +15,10 @@ class Categoria(models.Model):
 
     def __str__(self):
         return self.nombre_categoria
+    
+    def clean(self):
+        if not self.nombre_categoria:
+            raise ValidationError('El nombre de la marca no puede estar vacío.')
 
 class Marca(models.Model):
     id_marca = models.AutoField(primary_key=True)
@@ -27,6 +32,11 @@ class Marca(models.Model):
 
     def __str__(self):
         return self.nombre_marca
+
+    def clean(self):
+        if not self.nombre_marca:
+            raise ValidationError('El nombre de la marca no puede estar vacío.')
+
 
 class UnidadMedida(models.Model):
     id_unidadMedida = models.AutoField(primary_key=True)
