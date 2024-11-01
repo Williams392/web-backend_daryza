@@ -39,7 +39,8 @@ CREATE TABLE tb_usuario (
 
 INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
 ('kevin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 1, 1, 1, SYSDATETIME()),
-('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME());
+('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME()),
+('Juan3', 'juan3@gmail.com', '+51999999993', 'admin123456', 4, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME());
 
 --------------------------------------------------------------------------------------------------------
 
