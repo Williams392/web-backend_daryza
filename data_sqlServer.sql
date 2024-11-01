@@ -1,26 +1,47 @@
-create database BD_DARYZA_T3_v4;
-use BD_DARYZA_T3_v4;
+-- -------------------
+-- codigo SQL SERVER:
+-- -------------------
 
--- 1. Crear tabla tb_rol (usada como FK en tb_usuario)
+create database BD_DARYZA_T3_v5;
+use BD_DARYZA_T3_v5;
+
+-- 1. Crear tabla tb_rol:
 CREATE TABLE tb_rol (
     id_rol INT IDENTITY(1,1) PRIMARY KEY,
     name_role NVARCHAR(50) UNIQUE NOT NULL
 );
 
--- 2. Crear tabla tb_usuario (usa FK de tb_rol)
+INSERT INTO tb_rol (name_role) VALUES
+('Asignar'),
+('Administrador'),
+('Ventas'),
+('Almacen');
+
+-- 2. tabla actual de django:
 CREATE TABLE tb_usuario (
     id_user INT IDENTITY(1,1) PRIMARY KEY,
-    username NVARCHAR(50) UNIQUE NOT NULL,
-	password NVARCHAR(128) NOT NULL,
-    email NVARCHAR(150) UNIQUE NOT NULL,
-    phone_number NVARCHAR(15) NOT NULL,
-    created DATETIME DEFAULT GETDATE(),
-    modified DATETIME DEFAULT GETDATE(),
-    name_role INT NULL,
-    first_name NVARCHAR(50) NULL,
-    last_name NVARCHAR(50) NULL,
-    CONSTRAINT FK_Rol FOREIGN KEY (name_role) REFERENCES tb_rol(id_rol)
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(128) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    phone_number VARCHAR(15),
+    created DATETIME2(6) NOT NULL DEFAULT GETDATE(),
+    modified DATETIME2(6) NOT NULL DEFAULT GETDATE(),
+    is_superuser TINYINT NOT NULL,
+    is_staff TINYINT NOT NULL,
+    is_active TINYINT NOT NULL,
+    date_joined DATETIME2(6) NOT NULL,
+    last_login DATETIME2(6),
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    name_role_id INT,
+    CONSTRAINT FK_Rol FOREIGN KEY (name_role_id) REFERENCES tb_rol(id_rol)
 );
+
+INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
+('kevin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 1, 1, 1, SYSDATETIME()),
+('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME());
+
+--------------------------------------------------------------------------------------------------------
 
 -- 3. Crear tabla tb_categoria (usada como FK en tb_producto)
 CREATE TABLE tb_categoria (
@@ -175,8 +196,6 @@ CREATE TABLE tb_detalle_comprobante (
 );
 
 
-
-
 -- 13. Crear tabla tb_tipoMovimiento
 CREATE TABLE tb_tipoMovimiento (
     id_tipoMovimiento INT IDENTITY(1,1) PRIMARY KEY,
@@ -213,26 +232,7 @@ CREATE TABLE tb_detalleMovimiento (
 );
 
 
--- 1. tb_rol
-insert into tb_rol (name_role) VALUES ('Asignar'), ('Administrador'), ('Ventas'), ('Almacen');
-select * from tb_rol
 -- -------------------
-
-
--- 1. Antes de insertar crear el super user.
-INSERT INTO tb_rol (name_role) VALUES
-('Asignar'),
-('Administrador'),
-('Ventas'),
-('Almacen');
-
-INSERT INTO tb_usuario (username, password, email, phone_number, name_role, first_name, last_name) VALUES
-('admin_user', 'password123', 'admin@example.com', '1234567890', 1, 'Admin', 'User'),
-('sales_user', 'password456', 'sales@example.com', '0987654321', 2, 'Sales', 'User'),
-('inventory_user', 'password789', 'inventory@example.com', '1122334455', 3, 'Inventory', 'User'),
-('assign_user', 'password321', 'assign@example.com', '5566778899', 4, 'Assign', 'User'),
-('manager_user', 'password654', 'manager@example.com', '6677889900', 1, 'Manager', 'User');
-
 
 INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
 ('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
