@@ -39,7 +39,7 @@ class Legend(models.Model):
 
 class FormaPago(models.Model): # contado, credito, efectivo.
     id_formaPago = models.AutoField(primary_key=True)
-    tipo = models.CharField(max_length=10)
+    tipo = models.CharField(max_length=30)
     monto = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     cuota = models.IntegerField(default=0)
     fecha_emision = models.DateField(auto_now_add=True)  # Solo la fecha
@@ -55,7 +55,7 @@ class Comprobante(models.Model):
     #uuid_comprobante = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
 
     tipo_operacion = models.CharField(max_length=4)   # Catálogo No. 51
-    tipo_doc = models.CharField(max_length=3)  # Boleta - Factura
+    tipo_doc = models.CharField(max_length=4)  # Boleta - Factura
     numero_serie = models.CharField(max_length=4) # maximo 4 - sunat(B001 - F001)
     correlativo = models.CharField(max_length=25) # 1
     tipo_moneda = models.CharField(max_length=3)  # PEN - DOL

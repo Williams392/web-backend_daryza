@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import *
-from .reportes_almacen import *
+from reports.reporte_productos import *
 from reports.reporte_productos import DescargarPDFproductoView, DescargarExcelProductoView
 
 router = DefaultRouter()
