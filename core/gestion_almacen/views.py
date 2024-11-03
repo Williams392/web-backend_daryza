@@ -29,7 +29,7 @@ class ProductoFilter(filters.FilterSet):
         fields = ['nombre_prod', 'codigo', 'marca', 'categoria']
 
 class ProductoView(APIView):
-    # permission_classes = [IsAuthenticated, IsAlmacen]
+    permission_classes = [IsAuthenticated, IsAlmacen]
     # quite el permiso para el user ventas puede aceder a producto.
     
     def get(self, request, pk_producto=None):

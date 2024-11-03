@@ -24,19 +24,19 @@ from rest_framework.permissions import AllowAny  # Importar AllowAny para permit
 
 # Inicio de sesión
 class InicioSesionView(APIView):
-    permission_classes = [AllowAny] 
+    permission_classes = [AllowAny]  # Permitir acceso sin autenticación
 
     def post(self, request):
-        serializer = LoginSerializer(data=request.data)
+        email = request.data.get("email")
+        password = request.data.get("password")
         
-        # Validamos los datos de entrada usando LoginSerializer
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
-        email = serializer.validated_data.get("email")
-        password = serializer.validated_data.get("password")
-        
-        user = authenticate(request, email=email, password=password)
+        if not email or not password:
+            return Response(
+                {"code": 400, "msg": "Correo electrónico y contraseña son requeridos."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = authenticate(request, email=email, password=password) 
         
         if user is None:
             return Response(
@@ -45,6 +45,7 @@ class InicioSesionView(APIView):
             )
 
         try:
+            # Aquí se utiliza directamente el campo name_role del usuario autenticado
             name_role = user.name_role
 
             # Verificar si el usuario tiene el rol de Administrador y asignar superuser
@@ -61,9 +62,9 @@ class InicioSesionView(APIView):
             
             # Comprobar que name_role es un objeto Rol antes de acceder a sus atributos
             if isinstance(name_role, Rol):
-                user_data['role'] = name_role.name_role  
+                user_data['role'] = name_role.name_role  # Usar directamente name_role
             else:
-                user_data['role'] = None 
+                user_data['role'] = None  # O asignar un valor predeterminado
 
             return Response(user_data, status=status.HTTP_200_OK)
         
@@ -72,6 +73,7 @@ class InicioSesionView(APIView):
                 {"code": 301, "msg": "El usuario no tiene un perfil, crea una cuenta primero."},
                 status=status.HTTP_301_MOVED_PERMANENTLY
             )
+
 
 # Registro de nuevos usuarios
 class UserView(APIView):

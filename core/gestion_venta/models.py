@@ -4,6 +4,7 @@ from gestion_almacen.models import Producto
 from authentication.models import CustomUser
 import uuid
 from decimal import Decimal
+from django.utils import timezone
 
 class Cliente(models.Model):  # RECEPTOR
     id_cliente = models.AutoField(primary_key=True)
@@ -19,6 +20,8 @@ class Cliente(models.Model):  # RECEPTOR
     tipo_empresa = models.CharField(max_length=255, null=True, blank=True)
     email_cliente = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
     telefono_cliente = models.CharField(max_length=20, null=True, blank=True)
+    fecha_creacion = models.DateTimeField(default=timezone.now)  # Fecha de creación
+
 
     def __str__(self):
         return self.nombre_clie

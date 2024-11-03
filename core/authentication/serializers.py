@@ -9,22 +9,7 @@ class LoginSerializer(serializers.Serializer):
         required=True, 
         validators=[EmailValidator(message="El correo electrónico no tiene un formato válido.")]
     )
-    password = serializers.CharField(
-        required=True,
-        write_only=True,
-        min_length=6,
-        error_messages={
-            'min_length': 'La contraseña debe tener al menos 6 caracteres.'
-        }
-    )
-
-    def validate(self, data):
-        password = data.get('password')
-        if password and len(password) < 6:
-            raise ValidationError({
-                'password': 'La contraseña debe tener al menos 6 caracteres.'
-            })
-        return data
+    password = serializers.CharField(required=True, write_only=True)
 
 class RolSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,10 +37,6 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = {
             'password': {'write_only': False}  # False significa q el user puede ver su contraseña encriptada. 
         }
-    def validate_password(self, value):
-        if len(value) < 6:
-            raise ValidationError("La contraseña debe tener al menos 6 caracteres.")
-        return make_password(value)
 
     def get_name_role(self, obj):
         return obj.name_role.name_role if obj.name_role else None
