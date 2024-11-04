@@ -44,7 +44,7 @@ urlpatterns = [
     path('api/movimientos/', include('movimientos.urls')),
     path('api/venta/', include('gestion_venta.urls')),
 
-    # Acceder ala Documentacion con drf_yasg:
+    # Acceder ala Documentacion con drf_yasg - redoc:
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 
