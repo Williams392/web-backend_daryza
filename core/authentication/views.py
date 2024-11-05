@@ -59,7 +59,8 @@ class InicioSesionView(APIView):
             user_serializer = UserSerializer(user)
             user_data = dict(user_serializer.data)
             user_data['token'] = str(token.key)  # Añadir el token a los datos del usuario
-            
+            #user_data['username'] = user.username 
+
             # Comprobar que name_role es un objeto Rol antes de acceder a sus atributos
             if isinstance(name_role, Rol):
                 user_data['role'] = name_role.name_role  # Usar directamente name_role
@@ -186,6 +187,20 @@ class UserView(APIView):
         # Guardar los cambios
         serializer.save()
         return Response(serializer.data)
+    
+    def delete(self, request, pk):
+        try:
+            user = CustomUser.objects.get(pk=pk)
+            
+            # Verificar si el usuario que intenta eliminar es el mismo que está autenticado
+            if user.id_user == request.user.id_user:
+                return Response({"error": "No puedes eliminar tu propia cuenta."}, status=status.HTTP_403_FORBIDDEN)
+
+            user.delete()  # Eliminar el usuario
+            return Response({"message": "Usuario eliminado correctamente."}, status=status.HTTP_204_NO_CONTENT)
+        
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Usuario no encontrado."}, status=status.HTTP_404_NOT_FOUND)
 
 
 # Cierre de sesión de los usuarios autenticados      

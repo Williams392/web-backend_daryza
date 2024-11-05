@@ -33,11 +33,6 @@ class ClienteSerializer(serializers.ModelSerializer):
 
         return data
 
-# class EmpresaSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Empresa
-#         fields = '__all__'
-
 class LegendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Legend
@@ -80,7 +75,7 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                   'monto_Oper_Gravadas', 'monto_Igv', 
                   'valor_venta', 'sub_Total',
                   'monto_Imp_Venta', 'estado_Documento', 'manual', 
-                  'detalle', 'forma_pago', 'legend_comprobante', 'pdf_url']
+                  'detalle', 'forma_pago', 'legend_comprobante', 'usuario', 'pdf_url']
         extra_kwargs = {
             'monto_Igv': {'required': False},
             #'total_impuestos': {'required': False},

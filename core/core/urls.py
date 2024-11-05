@@ -43,6 +43,7 @@ urlpatterns = [
     path('api/almacen/', include('gestion_almacen.urls')),
     path('api/movimientos/', include('movimientos.urls')),
     path('api/venta/', include('gestion_venta.urls')),
+    path('api/dashboard/', include('dashboard.urls')),
 
     # Acceder ala Documentacion con drf_yasg - redoc:
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

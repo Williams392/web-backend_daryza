@@ -3,13 +3,11 @@ from rest_framework.routers import DefaultRouter
 from .views import *
 from reports.reporte_productos import *
 from reports.reporte_productos import DescargarPDFproductoView, DescargarExcelProductoView
-from reports.dashboard import DashboardViewProductoSet 
 
 router = DefaultRouter()
 router.register(r'categorias', CategoriaViewSet)
 router.register(r'marcas', MarcaViewSet)
 router.register(r'unidadesmedida', UnidadMedidaViewSet)
-router.register(r'dashboard', DashboardViewProductoSet, basename='dashboard-productos') 
 
 urlpatterns = [
     path('', include(router.urls)),

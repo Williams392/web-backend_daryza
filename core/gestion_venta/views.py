@@ -100,6 +100,9 @@ class ComprobanteAPIView(APIView):
             return Response({"error": "Cliente no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         comprobante_data['cliente'] = cliente.id_cliente
 
+        # Asignar el usuario autenticado al comprobante
+        comprobante_data['usuario'] = request.user.id_user
+
         monto_Oper_Gravadas = Decimal('0.00')
         monto_Igv = Decimal('0.00')
         sub_Total = Decimal('0.00')
@@ -207,25 +210,6 @@ class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsVentas]
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
-
-    # @action(detail=False, methods=['get'])
-    # def conteo_y_aumento(self, request):
-    #     total_clientes = Cliente.objects.count()
-        
-    #     # Obtener clientes creados en el último mes
-    #     fecha_hace_un_mes = now() - timedelta(days=30)
-    #     clientes_mes_anterior = Cliente.objects.filter(fecha_creacion__lt=fecha_hace_un_mes).count()
-        
-    #     # Calcular el porcentaje de aumento
-    #     if clientes_mes_anterior == 0:
-    #         porcentaje_aumento = 100  # Suponemos un aumento del 100% si no había clientes antes
-    #     else:
-    #         porcentaje_aumento = ((total_clientes - clientes_mes_anterior) / clientes_mes_anterior) * 100
-
-    #     return Response({
-    #         "total_clientes": total_clientes,
-    #         "porcentaje_aumento": porcentaje_aumento
-    #     })
 
 
 class FormaPagoViewSet(viewsets.ModelViewSet):

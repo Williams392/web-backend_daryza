@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'gestion_venta',
     'movimientos',
     'comprobante_pago',
+    'dashboard',
 ]
 
 MIDDLEWARE = [

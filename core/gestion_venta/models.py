@@ -55,8 +55,6 @@ class FormaPago(models.Model): # contado, credito, efectivo.
 # Boleta comienza con B001 - Factura comienza con F001
 class Comprobante(models.Model):
     id_comprobante = models.AutoField(primary_key=True)
-    #uuid_comprobante = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
-
     tipo_operacion = models.CharField(max_length=4)   # Catálogo No. 51
     tipo_doc = models.CharField(max_length=4)  # Boleta - Factura
     numero_serie = models.CharField(max_length=4) # maximo 4 - sunat(B001 - F001)
