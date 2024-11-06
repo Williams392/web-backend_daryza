@@ -93,12 +93,20 @@ class ComprobanteAPIView(APIView):
         forma_pago_data = comprobante_data.pop('forma_pago')
 
         # Obtener datos del cliente
-        cliente_id = comprobante_data['cliente']['cliente_id']
+        id_cliente = comprobante_data['cliente']
         try:
-            cliente = Cliente.objects.get(id_cliente=cliente_id)
+            cliente = Cliente.objects.get(id_cliente=id_cliente)
         except Cliente.DoesNotExist:
             return Response({"error": "Cliente no encontrado"}, status=status.HTTP_404_NOT_FOUND)
         comprobante_data['cliente'] = cliente.id_cliente
+
+        # Obtener datos de la sucursal
+        id_sucursal = comprobante_data['sucursal']
+        try:
+            sucursal = Sucursal.objects.get(id_sucursal=id_sucursal)
+        except Sucursal.DoesNotExist:
+            return Response({"error": "Sucursal no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+        comprobante_data['sucursal'] = sucursal.id_sucursal
 
         # Asignar el usuario autenticado al comprobante
         comprobante_data['usuario'] = request.user.id_user
@@ -182,7 +190,7 @@ class ComprobanteAPIView(APIView):
 
             response_data = comprobante_serializer.data
             response_data['cliente'] = {
-                'cliente_id': cliente.id_cliente,
+                'id_cliente': cliente.id_cliente,
                 'cliente_num_doc': cliente_num_doc,
                 'cliente_denominacion': f"{cliente.nombre_clie} {cliente.apellido_clie}" if comprobante.cliente_tipo_doc == "1" else cliente.razon_socialCliente,
                 'cliente_direccion': cliente.direccion_clie
@@ -205,11 +213,18 @@ class ComprobanteAPIView(APIView):
         comprobante.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
             
+class SucursalViewSet(viewsets.ModelViewSet):
+    queryset = Sucursal.objects.all()
+    serializer_class = SucursalSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre_sucursal']
 
 class ClienteViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsVentas]
     queryset = Cliente.objects.all()
     serializer_class = ClienteSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['nombre_clie', 'dni_cliente', 'ruc_cliente']
 
 
 class FormaPagoViewSet(viewsets.ModelViewSet):

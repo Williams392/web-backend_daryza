@@ -3,6 +3,9 @@
 from django.contrib import admin
 from .models import *
 
+class SucursalAdmin(admin.ModelAdmin):
+    list_display = ('nombre_sucursal', 'telf_suc', 'direccion_sucursal')
+
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('id_cliente', 'nombre_clie', 'dni_cliente', 'ruc_cliente')
 
@@ -16,6 +19,7 @@ class ComprobanteAdmin(admin.ModelAdmin):
     list_display = ('id_comprobante', 'tipo_operacion', 'numero_serie', 'fecha_emision', 'hora_emision')
 
 admin.site.register(Cliente, ClienteAdmin)
+admin.site.register(Sucursal, SucursalAdmin)
 admin.site.register(Legend, LegendAdmin)  
 admin.site.register(FormaPago, FormaPagoAdmin)
 admin.site.register(Comprobante, ComprobanteAdmin)

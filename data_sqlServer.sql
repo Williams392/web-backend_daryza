@@ -136,7 +136,7 @@ VALUES ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 10
 	   ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 1, 1, 1);
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
--- 7. Crear tabla tb_paciente
+-- 7. Crear tabla tb_cliente
 CREATE TABLE tb_cliente (
     id_cliente INT IDENTITY(1,1) PRIMARY KEY,
     nombre_clie NVARCHAR(255) NULL,
@@ -149,27 +149,18 @@ CREATE TABLE tb_cliente (
 	
 	tipo_empresa NVARCHAR(255) NULL,
     email_cliente NVARCHAR(50) NULL,
-    telefono_cliente NVARCHAR(20) NULL
+    telefono_cliente NVARCHAR(20) NULL,
+    fecha_creacion DATETIME DEFAULT GETDATE() 
 );
 GO
 
-INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, tipo_empresa, email_cliente, telefono_cliente)
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion)
 VALUES 
-('Juan', 'Pérez', 'Av. Principal 123', '12345678', '20123456789', 'Natural', 'juan.perez@example.com', '987654321'),
-('María', 'Gómez', 'Calle Secundaria 456', '23456789', '20123456790', 'Natural', 'maria.gomez@example.com', '987654322'),
-('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323'),
-('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324'),
-('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325'),
-('Fernanda', 'Díaz', 'Calle de la Paz 303', '67890123', '20123456794', 'Natural', 'fernanda.diaz@example.com', '987654326'),
-('Diego', 'Reyes', 'Av. Santa Cruz 404', '78901234', '20123456795', 'Natural', 'diego.reyes@example.com', '987654327'),
-('Laura', 'Hernández', 'Calle del Sol 505', '89012345', '20123456796', 'Natural', 'laura.hernandez@example.com', '987654328'),
-('Andrés', 'Ramírez', 'Av. Los Angeles 606', '90123456', '20123456797', 'Natural', 'andres.ramirez@example.com', '987654329'),
-('Patricia', 'Torres', 'Paseo de los Héroes 707', '01234567', '20123456798', 'Natural', 'patricia.torres@example.com', '987654330'),
-('Francisco', 'Cruz', 'Av. La Libertad 808', '12345679', '20123456799', 'Natural', 'francisco.cruz@example.com', '987654331'),
-('Sofía', 'Vargas', 'Calle de la Esperanza 909', '23456780', '20123456800', 'Natural', 'sofia.vargas@example.com', '987654332'),
-('Javier', 'Castro', 'Calle del Río 1001', '34567891', '20123456801', 'Natural', 'javier.castro@example.com', '987654333'),
-('Nadia', 'Salazar', 'Calle del Bosque 1102', '45678902', '20123456802', 'Natural', 'nadia.salazar@example.com', '987654334'),
-('Ricardo', 'Alvarez', 'Av. Las Flores 1203', '56789013', '20123456803', 'Natural', 'ricardo.alvarez@example.com', '987654335');
+('Juan', 'Pérez', 'Av. Principal 123', '12345678', '20123456789', 'Natural', 'juan.perez@example.com', '987654321', GETDATE()),
+('María', 'Gómez', 'Calle Secundaria 456', '23456789', '20123456790', 'Natural', 'maria.gomez@example.com', '987654322', GETDATE()),
+('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
+('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
+('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 8. Tabla: tb_legend

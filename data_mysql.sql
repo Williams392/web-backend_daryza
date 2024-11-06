@@ -62,9 +62,9 @@ INSERT INTO tb_tipoMovimiento (descripcion) VALUES
 ('Salida');
 -- select * from tb_tipoMovimiento
 
-INSERT INTO tb_cliente (nombre_clie, apellido_clie, dni_cliente, ruc_cliente, direccion_clie, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente) VALUES
-('Carlos', 'Fernandez', '12345678', '20123456789', 'Av. Siempre Viva 123, Lima', 'Carlos Fernandez S.A.C.', 'Empresa Privada', 'carlos.fernandez@example.com', '+51987654321'),
-('María', 'Gomez', '87654321', '20234567890', 'Calle Los Pinos 456, Arequipa', 'María Gomez EIRL', 'Pequeña Empresa', 'maria.gomez@example.com', '+51981234567'),
-('Jorge', 'Ramirez', '23456789', '20345678901', 'Jr. Las Flores 789, Trujillo', 'JR Servicios Generales', 'Mediana Empresa', 'jorge.ramirez@example.com', '+51983456789'),
-('Lucia', 'Lopez', '34567890', '20456789012', 'Av. El Sol 135, Cusco', 'Lucia Lopez Corp.', 'Empresa Familiar', 'lucia.lopez@example.com', '+51985678901');
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, dni_cliente, ruc_cliente, direccion_clie, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion) VALUES
+('Carlos', 'Fernandez', '12345678', '20123456789', 'Av. Siempre Viva 123, Lima', 'Carlos Fernandez S.A.C.', 'Empresa Privada', 'carlos.fernandez@example.com', '+51987654321', '2024-11-01 10:30:00'),
+('María', 'Gomez', '87654321', '20234567890', 'Calle Los Pinos 456, Arequipa', 'María Gomez EIRL', 'Pequeña Empresa', 'maria.gomez@example.com', '+51981234567', '2024-11-01 10:30:00'),
+('Jorge', 'Ramirez', '23456789', '20345678901', 'Jr. Las Flores 789, Trujillo', 'JR Servicios Generales', 'Mediana Empresa', 'jorge.ramirez@example.com', '+51983456789', '2024-11-01 10:30:00'),
+('Lucia', 'Lopez', '34567890', '20456789012', 'Av. El Sol 135, Cusco', 'Lucia Lopez Corp.', 'Empresa Familiar', 'lucia.lopez@example.com', '+51985678901', '2024-11-01 10:30:00');
 select * from tb_cliente

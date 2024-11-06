@@ -7,6 +7,11 @@ from django.db.models.functions import Cast
 from .docs.pdf_generator import generar_pdf_comprobante
 from django.conf import settings
 
+class SucursalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sucursal
+        fields = '__all__'
+        
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
@@ -59,23 +64,27 @@ class DetalleComprobanteSerializer(serializers.ModelSerializer):
 
 class ComprobanteSerializer(serializers.ModelSerializer):
     cliente = serializers.PrimaryKeyRelatedField(queryset=Cliente.objects.all())
+    sucursal = serializers.PrimaryKeyRelatedField(queryset=Sucursal.objects.all())
     detalle = DetalleComprobanteSerializer(many=True)
     forma_pago = FormaPagoSerializer()
     legend_comprobante = LegendSerializer()
 
     class Meta:
         model = Comprobante
-        fields = ['id_comprobante', 'tipo_operacion', 'tipo_doc', 'numero_serie', 'correlativo',
-                  'tipo_moneda', 'fecha_emision', 'hora_emision',
+        fields = [
+                'id_comprobante', 'tipo_operacion', 'tipo_doc', 'numero_serie', 'correlativo',
+                'tipo_moneda', 'fecha_emision', 'hora_emision',
 
-                  'empresa_ruc', 'razon_social', 'nombre_comercial', 'urbanizacion', 
-                  'distrito', 'departamento', 'email_empresa', 'telefono_emp',
+                'empresa_ruc', 'razon_social', 'nombre_comercial', 'urbanizacion', 
+                'distrito', 'departamento', 'email_empresa', 'telefono_emp',
 
-                  'cliente_tipo_doc', 'cliente',
-                  'monto_Oper_Gravadas', 'monto_Igv', 
-                  'valor_venta', 'sub_Total',
-                  'monto_Imp_Venta', 'estado_Documento', 'manual', 
-                  'detalle', 'forma_pago', 'legend_comprobante', 'usuario', 'pdf_url']
+                'cliente_tipo_doc', 'cliente','sucursal',
+                'monto_Oper_Gravadas', 'monto_Igv', 
+                'valor_venta', 'sub_Total',
+                'monto_Imp_Venta', 'estado_Documento', 'manual', 
+                'detalle', 'forma_pago', 'legend_comprobante', 
+                'usuario', 'pdf_url'
+                ]
         extra_kwargs = {
             'monto_Igv': {'required': False},
             #'total_impuestos': {'required': False},
@@ -184,16 +193,22 @@ class ComprobanteSerializer(serializers.ModelSerializer):
 
         return comprobante
 
-
-
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        cliente = instance.cliente  # Obtener el cliente relacionado
-        
-        # Simplificar representación del cliente, sin lógica para cliente_num_doc
+
+        # Añadir datos de la sucursal
+        sucursal = instance.sucursal
+        representation['sucursal'] = {
+            'id_sucursal': sucursal.id_sucursal,
+            'nombre_sucursal': sucursal.nombre_sucursal,
+            'direccion_sucursal': sucursal.direccion_sucursal
+        }
+
+        # Añadir datos del cliente
+        cliente = instance.cliente
         representation['cliente'] = {
-            'cliente_id': cliente.id_cliente,
-            'cliente_num_doc': cliente.ruc_cliente, 
+            'id_cliente': cliente.id_cliente,
+            'cliente_num_doc': cliente.ruc_cliente,
             'cliente_razon_social': cliente.razon_socialCliente or f"{cliente.nombre_clie} {cliente.apellido_clie}",
             'cliente_direccion': cliente.direccion_clie
         }

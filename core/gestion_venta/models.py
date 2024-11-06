@@ -5,6 +5,21 @@ from authentication.models import CustomUser
 import uuid
 from decimal import Decimal
 from django.utils import timezone
+#from movimientos.models import Sucursal
+
+class Sucursal(models.Model):
+    id_sucursal = models.AutoField(primary_key=True)
+    nombre_sucursal = models.CharField(max_length=50)
+    descripcion = models.CharField(max_length=50, null=True)
+    telf_suc = models.CharField(max_length=20)
+    correo_suc = models.CharField(max_length=150)
+    direccion_sucursal = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.nombre_sucursal
+    
+    class Meta:
+        db_table = 'tb_sucursal'
 
 class Cliente(models.Model):  # RECEPTOR
     id_cliente = models.AutoField(primary_key=True)
@@ -21,7 +36,6 @@ class Cliente(models.Model):  # RECEPTOR
     email_cliente = models.EmailField(max_length=50, validators=[EmailValidator()], null=True, blank=True)
     telefono_cliente = models.CharField(max_length=20, null=True, blank=True)
     fecha_creacion = models.DateTimeField(default=timezone.now)  # Fecha de creación
-
 
     def __str__(self):
         return self.nombre_clie
@@ -92,6 +106,7 @@ class Comprobante(models.Model):
 
     cliente = models.ForeignKey(Cliente, on_delete=models.CASCADE, null=True)
     usuario = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True)
+    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, null=True) 
 
     class Meta:
         db_table = 'tb_comprobante'

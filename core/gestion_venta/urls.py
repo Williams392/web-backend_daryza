@@ -7,6 +7,7 @@ from rest_framework.routers import DefaultRouter
 from .views import *
 
 router = DefaultRouter()
+router.register(r'sucursales', SucursalViewSet)
 router.register(r'clientes', ClienteViewSet)
 router.register(r'legend', LegendViewSet)
 router.register(r'forma_pago', FormaPagoViewSet)

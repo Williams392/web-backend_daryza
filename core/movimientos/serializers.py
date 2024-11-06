@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import *
 
-class SucursalSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Sucursal
-        fields = '__all__'
+# class SucursalSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Sucursal
+#         fields = '__all__'
 
 # class MovimientoSerializer(serializers.ModelSerializer):
 #     class Meta:

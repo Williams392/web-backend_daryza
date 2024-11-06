@@ -5,7 +5,7 @@ from reports.reporte_movimientos import DescargarMovimientoPDFView, DescargarExc
 
 router = DefaultRouter()
 
-router.register(r'sucursales', SucursalViewSet)
+# router.register(r'sucursales', SucursalViewSet)
 router.register(r'movimientos', MovimientoViewSet)
 router.register(r'detallemovimientos', DetalleMovimientoViewSet)
 router.register(r'tiposmovimientos', TipoMovimientoViewSet)

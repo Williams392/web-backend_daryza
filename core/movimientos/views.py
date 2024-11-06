@@ -6,11 +6,11 @@ from .models import *
 from .serializers import *
 
 # CRUD:
-class SucursalViewSet(viewsets.ModelViewSet):
-    queryset = Sucursal.objects.all()
-    serializer_class = SucursalSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['nombre']
+# class SucursalViewSet(viewsets.ModelViewSet):
+#     queryset = Sucursal.objects.all()
+#     serializer_class = SucursalSerializer
+#     filter_backends = [DjangoFilterBackend]
+#     filterset_fields = ['nombre']
 
 class MovimientoViewSet(viewsets.ModelViewSet):
     queryset = Movimiento.objects.all()
