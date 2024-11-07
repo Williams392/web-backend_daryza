@@ -84,42 +84,45 @@ class DescargarMovimientoPDFView(APIView):
             tipo_movimiento = "Entrada" if movimiento.tipo_movimiento.descripcion == "Entrada" else "Salida"
             created_at_date = movimiento.created_at.strftime('%Y-%m-%d')
             for detalle in movimiento.detallemovimiento_set.all():
-                data.append([
-                    movimiento.id_movimiento,
-                    detalle.producto.nombre_prod,
-                    movimiento.referencia,
-                    movimiento.cant_total,
-                    tipo_movimiento,
+                data.append([ 
+                    movimiento.id_movimiento, 
+                    detalle.producto.nombre_prod, 
+                    movimiento.referencia, 
+                    movimiento.cant_total, 
+                    tipo_movimiento, 
                     created_at_date
                 ])
 
         # Definir anchos de columnas ajustados
-        table = Table(data, colWidths=[
-            (A4[0] - 60) * 0.1,  # ID
-            (A4[0] - 60) * 0.2,  # Producto
-            (A4[0] - 60) * 0.2,  # Referencia
-            (A4[0] - 60) * 0.15,  # Cantidad Total
-            (A4[0] - 60) * 0.15,  # Tipo Movimiento
+        table = Table(data, colWidths=[ 
+            (A4[0] - 60) * 0.1,  # ID 
+            (A4[0] - 60) * 0.2,  # Producto 
+            (A4[0] - 60) * 0.2,  # Referencia 
+            (A4[0] - 60) * 0.15,  # Cantidad Total 
+            (A4[0] - 60) * 0.15,  # Tipo Movimiento 
             (A4[0] - 60) * 0.2   # Fecha Creación
-        ])
+        ]) 
 
         # Estilo de la tabla adaptado
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.black),
-            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-            ('FONTSIZE', (0, 0), (-1, 0), 10),
-            ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-            ('FONTSIZE', (0, 1), (-1, -1), 8),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.white),
-            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-            ('GRID', (0, 0), (-1, -1), 1, colors.black),
+        table.setStyle(TableStyle([ 
+            ('BACKGROUND', (0, 0), (-1, 0), colors.black), 
+            ('TEXTCOLOR', (0, 0), (-1, 0), colors.white), 
+            ('ALIGN', (0, 0), (-1, -1), 'CENTER'), 
+            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), 
+            ('FONTSIZE', (0, 0), (-1, 0), 10), 
+            ('BOTTOMPADDING', (0, 0), (-1, 0), 8), 
+            ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'), 
+            ('FONTSIZE', (0, 1), (-1, -1), 8), 
+            ('BACKGROUND', (0, 1), (-1, -1), colors.white), 
+            ('TEXTCOLOR', (0, 1), (-1, -1), colors.black), 
+            ('GRID', (0, 0), (-1, -1), 1, colors.black), 
         ]))
 
         elements.append(table)
-        doc.build(elements, onFirstPage=draw_header, onLaterPages=draw_header)
+
+        # Agregar el encabezado solo a la primera página
+        doc.build(elements, onFirstPage=draw_header, onLaterPages=lambda canvas, doc: None)
+
         return response
 
 

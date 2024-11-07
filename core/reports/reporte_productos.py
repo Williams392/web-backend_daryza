@@ -26,7 +26,7 @@ class DescargarPDFproductoView(APIView):
 
         doc = SimpleDocTemplate(response, pagesize=A4)
         elements = []
-        
+
         # Crear el encabezado como una función
         def draw_header(canvas, doc):
             width, height = A4
@@ -124,7 +124,7 @@ class DescargarPDFproductoView(APIView):
         ]))
 
         elements.append(table)
-        doc.build(elements, onFirstPage=draw_header, onLaterPages=draw_header)
+        doc.build(elements, onFirstPage=draw_header)  # Solo en la primera página
         return response
 
 
