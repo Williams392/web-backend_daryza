@@ -19,7 +19,7 @@ from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsVentas
 from authentication.permissions import IsAdmin
 
-from .docs.pdf_generator import generar_pdf_comprobante
+
 from .models import *
 from .serializers import *
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
@@ -54,7 +54,6 @@ class ComprobantePDFView(APIView):
             response['Content-Disposition'] = f'attachment; filename="{os.path.basename(pdf_path)}"'
             return response
         
-
 # Función para convertir el monto a letras en soles
 def convertir_a_monto_letras(monto):
     enteros = int(monto)
@@ -240,10 +239,3 @@ class LegendViewSet(viewsets.ModelViewSet):
     serializer_class = LegendSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['legend_code', 'comprobante']
-
-# class EmpresaViewSet(viewsets.ModelViewSet):
-#     permission_classes = [IsAuthenticated, IsVentas]
-#     queryset = Empresa.objects.all()
-#     serializer_class = EmpresaSerializer
-#     filter_backends = [DjangoFilterBackend]
-#     filterset_fields = ['ruc_empresa', 'razon_social']  # Asegúrate que estos campos existan en el modelo

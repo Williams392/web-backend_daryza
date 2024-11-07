@@ -1,6 +1,6 @@
-import pytest
-from gestion_almacen.models import Marca
-from django.core.exceptions import ValidationError
+# import pytest
+# from gestion_almacen.models import Marca
+# from django.core.exceptions import ValidationError
 
 # @pytest.fixture
 # def marca():

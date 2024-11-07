@@ -4,8 +4,9 @@ from .models import *
 from decimal import Decimal
 from django.db.models import Max, IntegerField
 from django.db.models.functions import Cast
-from .docs.pdf_generator import generar_pdf_comprobante
+#from .docs.pdf_generator import generar_pdf_comprobante
 from django.conf import settings
+from reports.pdf_venta_generator import generar_pdf_comprobante
 
 class SucursalSerializer(serializers.ModelSerializer):
     class Meta:
@@ -165,6 +166,7 @@ class ComprobanteSerializer(serializers.ModelSerializer):
             'numero_serie': comprobante.numero_serie,
             'correlativo': comprobante.correlativo,
             'fecha_emision': comprobante.fecha_emision,
+            'hora_emision': comprobante.hora_emision,
             'razon_social': comprobante.razon_social,
             'urbanizacion': comprobante.urbanizacion,
             'distrito': comprobante.distrito,
@@ -179,8 +181,29 @@ class ComprobanteSerializer(serializers.ModelSerializer):
                 'dni_cliente': cliente.dni_cliente,
                 'nombre_clie': cliente.nombre_clie,
                 'apellido_clie': cliente.apellido_clie,
+            },
+            # Incluir detalle
+            'detalle': [
+                {
+                    'id_producto': d['id_producto'],
+                    'unidad': d['unidad'],
+                    'descripcion': d['descripcion'],
+                    'cantidad': d['cantidad'],
+                    'monto_valorUnitario': d['monto_valorUnitario'],
+                    'igv_detalle': d['igv_detalle'],
+                    'monto_Precio_Unitario': d['monto_Precio_Unitario'],
+                    'monto_Valor_Venta': d['monto_Valor_Venta']
+                }
+                for d in detalle_data  # Usamos detalle_data ya extraído al inicio
+            ],
+             # Incluir los montos y el legend
+            'monto_Oper_Gravadas': validated_data.get('monto_Oper_Gravadas'),
+            'monto_Igv': validated_data.get('monto_Igv'),
+            'monto_Imp_Venta': validated_data.get('monto_Imp_Venta'),
+            'legend_comprobante': {
+                'legend_code': legend_data['legend_code'],
+                'legend_value': legend_data['legend_value']
             }
-            # ... otros datos necesarios
         }
 
         # Generar PDF del comprobante y obtener la ruta de salida
