@@ -18,7 +18,7 @@ INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, c
 -- ('juan3', 'juan3@gmail.com', '+51999999993', 'admin123456', 4, NOW(), NOW(), FALSE, FALSE, TRUE, NOW());
  -- Actualizar la contraseña en admin django y agregar un token.
  
-INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
+INSERT INTO tb_sucursal (nombre_sucursal, descripcion, telf_suc, correo_suc, direccion_sucursal) VALUES
 ('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
  
 INSERT INTO tb_categoria (nombre_categoria, estado_categoria, created_at, update_at) VALUES

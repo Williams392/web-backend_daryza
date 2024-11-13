@@ -2,8 +2,8 @@
 -- codigo SQL SERVER:
 -- -------------------
 
-create database BD_DARYZA_T3_v8;
-use BD_DARYZA_T3_v8;
+create database BD_DARYZA_DJANGO;
+use BD_DARYZA_DJANGO;
 
 
 -- 1. Crear tabla tb_rol:
@@ -85,6 +85,7 @@ INSERT INTO tb_marca (nombre_marca, estado_marca, created_at, update_at) VALUES
 ('Windex', 1, GETDATE(), GETDATE()),
 ('Scrubbing Bubbles', 1, GETDATE(), GETDATE()),
 ('Seventh Generation', 1, GETDATE(), GETDATE());
+select * from tb_marca;
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 5. Crear tabla tb_unidadMedida (usada como FK en tb_producto)
@@ -121,19 +122,27 @@ CREATE TABLE tb_producto (
     estock INT NOT NULL,
     estock_minimo INT NOT NULL,
     imagen NVARCHAR(MAX) NULL,
-    marca INT NOT NULL,
-    categoria INT NOT NULL,
-    unidad_medida INT NOT NULL,
+    marca_id INT NOT NULL,
+    categoria_id INT NOT NULL,
+    unidad_medida_id INT NOT NULL,
     created_at DATETIME DEFAULT GETDATE(),
     update_at DATETIME DEFAULT GETDATE(),
-    CONSTRAINT FK_Marca FOREIGN KEY (marca) REFERENCES tb_marca(id_marca),
-    CONSTRAINT FK_Categoria FOREIGN KEY (categoria) REFERENCES tb_categoria(id_categoria),
-    CONSTRAINT FK_UnidadMedida FOREIGN KEY (unidad_medida) REFERENCES tb_unidadMedida(id_unidadMedida)
+    CONSTRAINT FK_Marca FOREIGN KEY (marca_id) REFERENCES tb_marca(id_marca),
+    CONSTRAINT FK_Categoria FOREIGN KEY (categoria_id) REFERENCES tb_categoria(id_categoria),
+    CONSTRAINT FK_UnidadMedida FOREIGN KEY (unidad_medida_id) REFERENCES tb_unidadMedida(id_unidadMedida)
 );
 GO
-INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca, categoria, unidad_medida)
-VALUES ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1),
-	   ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 1, 1, 1);
+
+-- Inserción de datos con las columnas de fecha
+INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca_id, categoria_id, unidad_medida_id, created_at, update_at)
+VALUES 
+    ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1,  GETDATE(),  GETDATE()),
+    ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 2, 1, 1,  GETDATE(),  GETDATE());
+GO
+
+-- Verificación de los datos en tb_producto
+SELECT * FROM tb_producto;
+
 
 ------------------------------------------------------------------------------------------------------------------------------------------------
 -- 7. Crear tabla tb_cliente
@@ -161,6 +170,7 @@ VALUES
 ('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
 ('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
 ('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
+SELECT * FROM tb_cliente;
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 8. Tabla: tb_legend
@@ -199,19 +209,20 @@ VALUES
 ('Contado', 350.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
 ('Prepago', 90.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
 ('Crédito a 6 meses', 500.00, 6, GETDATE(), DATEADD(MONTH, 6, GETDATE()));
+select * from tb_forma_pago;
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 10. Crear tabla tb_sucursal (usada como FK en tb_comprobante y tb_movimiento)
 CREATE TABLE tb_sucursal (
     id_sucursal INT IDENTITY(1,1) PRIMARY KEY,
-    nombre NVARCHAR(50) NOT NULL,
+    nombre_sucursal NVARCHAR(50) NOT NULL,
     descripcion NVARCHAR(50) NULL,
     telf_suc NVARCHAR(20) NOT NULL,
     correo_suc NVARCHAR(25) NOT NULL,
-    direccion NVARCHAR(50) NOT NULL
+    direccion_sucursal NVARCHAR(50) NOT NULL
 );
 GO
-INSERT INTO tb_sucursal (nombre, descripcion, telf_suc, correo_suc, direccion) VALUES
+INSERT INTO tb_sucursal (nombre_sucursal, descripcion, telf_suc, correo_suc, direccion_sucursal) VALUES
 ('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -243,20 +254,36 @@ CREATE TABLE tb_comprobante (
     estado_Documento NVARCHAR(1) DEFAULT '0',
     manual BIT DEFAULT 0,
     pdf_url NVARCHAR(255) NULL,
-    forma_pago INT NULL,
-    legend_comprobante INT NULL,
-    cliente INT NULL,
-    usuario INT NULL,
-    CONSTRAINT FK_tb_comprobante_forma_pago FOREIGN KEY (forma_pago) REFERENCES tb_forma_pago(id_formaPago) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_comprobante_legend FOREIGN KEY (legend_comprobante) REFERENCES tb_legend(id_legend) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_comprobante_cliente FOREIGN KEY (cliente) REFERENCES tb_cliente(id_cliente) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_comprobante_usuario FOREIGN KEY (usuario) REFERENCES tb_usuario(id_user) ON DELETE CASCADE
+
+	cliente_id INT NULL,
+	usuario_id INT NULL,
+    forma_pago_id INT NULL,
+    legend_comprobante_id INT NULL,
+
+    CONSTRAINT FK_tb_comprobante_forma_pago FOREIGN KEY (forma_pago_id) REFERENCES tb_forma_pago(id_formaPago) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_comprobante_legend FOREIGN KEY (legend_comprobante_id) REFERENCES tb_legend(id_legend) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_comprobante_cliente FOREIGN KEY (cliente_id) REFERENCES tb_cliente(id_cliente) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_comprobante_usuario FOREIGN KEY (legend_comprobante_id) REFERENCES tb_usuario(id_user) ON DELETE CASCADE
 );
 GO
-INSERT INTO tb_comprobante (tipo_operacion, tipo_doc, numero_serie, correlativo, tipo_moneda, fecha_emision, hora_emision, empresa_ruc, razon_social, nombre_comercial, urbanizacion, distrito, departamento, email_empresa, telefono_emp, cliente_tipo_doc, monto_Oper_Gravadas, monto_Igv, valor_venta, sub_Total, monto_Imp_Venta, estado_Documento, manual, pdf_url, forma_pago, legend_comprobante, cliente, usuario) VALUES
+-- Asegúrate de que los IDs en los campos de claves foráneas ya existan en sus respectivas tablas.
+-- Insertar datos en tb_comprobante
+INSERT INTO tb_comprobante (
+    tipo_operacion, tipo_doc, numero_serie, correlativo, tipo_moneda, fecha_emision, hora_emision,
+    empresa_ruc, razon_social, nombre_comercial, urbanizacion, distrito, departamento, email_empresa, telefono_emp, 
+    cliente_tipo_doc, monto_Oper_Gravadas, monto_Igv, valor_venta, sub_Total, monto_Imp_Venta, estado_Documento, 
+    manual, pdf_url, cliente_id, usuario_id, forma_pago_id, legend_comprobante_id
+) VALUES
 ('001', 'B001', '0010', '000001', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 1', 'Lima', 'Lima', 'info@daryza.com', '01-2345678', '12345678', 1000.00, 180.00, 1180.00, 1180.00, 1180.00, '1', 0, 'http://url.com/comprobante1.pdf', 1, 1, 1, 1),
 ('002', 'B002', '0020', '000002', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 2', 'Miraflores', 'Lima', 'ventas@daryza.com', '01-8765432', '12345678', 500.00, 90.00, 590.00, 590.00, 590.00, '1', 0, 'http://url.com/comprobante2.pdf', 2, 2, 2, 1);
+-- Verificar los datos insertados
 SELECT * FROM tb_comprobante;
+
+
+SELECT * 
+FROM INFORMATION_SCHEMA.COLUMNS 
+WHERE TABLE_NAME = 'tb_comprobante';
+
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 12. Tabla: tb_detalle_comprobante
@@ -264,7 +291,7 @@ CREATE TABLE tb_detalle_comprobante (
     id_detalleComprobante INT IDENTITY(1,1) PRIMARY KEY,
     unidad NVARCHAR(6) NOT NULL,
     cantidad INT NOT NULL CHECK (cantidad >= 0),
-    id_producto NVARCHAR(10) NOT NULL,
+    id_producto NVARCHAR(10) NOT NULL, -- inesesario.
     descripcion NVARCHAR(255) NOT NULL,
     monto_valorUnitario FLOAT DEFAULT 0,
     igv_detalle FLOAT DEFAULT 0,
@@ -272,17 +299,23 @@ CREATE TABLE tb_detalle_comprobante (
     hora_emision TIME DEFAULT GETDATE(),
     monto_Precio_Unitario DECIMAL(10, 2) DEFAULT 0,
     monto_Valor_Venta DECIMAL(10, 2) DEFAULT 0,
-    comprobante INT NULL,
-    producto INT NULL,
-    CONSTRAINT FK_tb_detalle_comprobante_comprobante FOREIGN KEY (comprobante) REFERENCES tb_comprobante(id_comprobante) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_detalle_comprobante_producto FOREIGN KEY (producto) REFERENCES tb_producto(id_producto) ON DELETE CASCADE
+    comprobante_id INT NULL,
+    producto_id INT NULL,
+    CONSTRAINT FK_tb_detalle_comprobante_comprobante FOREIGN KEY (comprobante_id) REFERENCES tb_comprobante(id_comprobante) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_detalle_comprobante_producto FOREIGN KEY (producto_id) REFERENCES tb_producto(id_producto) ON DELETE CASCADE
 );
 GO
-INSERT INTO tb_detalle_comprobante (unidad, cantidad, id_producto, descripcion, monto_valorUnitario, igv_detalle, monto_Precio_Unitario, monto_Valor_Venta, comprobante, producto)
+-- Inserción de datos en tb_detalle_comprobante
+INSERT INTO tb_detalle_comprobante (
+    unidad, cantidad, id_producto, descripcion, monto_valorUnitario, 
+    igv_detalle, monto_Precio_Unitario, monto_Valor_Venta, 
+    fecha_emision, hora_emision, comprobante_id, producto_id
+)
 VALUES 
-('KG', 10, 'P001', 'Detergente Líquido', 15.00, 2.70, 150.00, 162.70, 1, 1),
-('LT', 5, 'P002', 'Limpiador Multiusos', 20.00, 3.60, 100.00, 106.60, 2, 2);
-select * from tb_detalle_comprobante;
+('KG', 5, 'P001', 'Detergente Líquido', 15.00, 2.70, 150.00, 162.70, GETDATE(), GETDATE(), 1, 5),
+('LT', 6, 'P002', 'Limpiador Multiusos', 20.00, 3.60, 100.00, 106.60, GETDATE(), GETDATE(), 2, 6);
+
+SELECT * FROM tb_detalle_comprobante;
 ---------------------------------------------------------------------------------------------------------------------------------
 -- 13. Crear tabla tb_tipoMovimiento
 CREATE TABLE tb_tipoMovimiento (
@@ -303,36 +336,39 @@ CREATE TABLE tb_movimiento (
     cant_total INT NOT NULL CHECK (cant_total >= 0),
     created_at DATETIME DEFAULT GETDATE(),
     updated_at DATETIME DEFAULT GETDATE(),
-    sucursal INT NOT NULL,
-    usuario INT NOT NULL,
-    tipo_movimiento INT NOT NULL,
-    CONSTRAINT FK_tb_movimiento_sucursal FOREIGN KEY (sucursal) REFERENCES tb_sucursal(id_sucursal) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_movimiento_usuario FOREIGN KEY (usuario) REFERENCES tb_usuario(id_user) ON DELETE CASCADE,
-    CONSTRAINT FK_tb_movimiento_tipoMovimiento FOREIGN KEY (tipo_movimiento) REFERENCES tb_tipoMovimiento(id_tipoMovimiento) ON DELETE CASCADE
+    sucursal_id INT NOT NULL,
+    usuario_id INT NOT NULL,
+    tipo_movimiento_id INT NOT NULL,
+    CONSTRAINT FK_tb_movimiento_sucursal FOREIGN KEY (sucursal_id) REFERENCES tb_sucursal(id_sucursal) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_movimiento_usuario FOREIGN KEY (usuario_id) REFERENCES tb_usuario(id_user) ON DELETE CASCADE,
+    CONSTRAINT FK_tb_movimiento_tipoMovimiento FOREIGN KEY (tipo_movimiento_id) REFERENCES tb_tipoMovimiento(id_tipoMovimiento) ON DELETE CASCADE
 );
 GO
-INSERT INTO tb_movimiento (referencia, cant_total, sucursal, created_at, updated_at, usuario, tipo_movimiento)
+INSERT INTO tb_movimiento (referencia, cant_total, sucursal_id, created_at, updated_at, usuario_id, tipo_movimiento_id)
 VALUES 
 ('Ingreso de productos', 200, 1, GETDATE(), GETDATE(), 1, 1),
 ('Venta de productos', 1, 1, GETDATE(), GETDATE(), 2, 1);
+select * from tb_movimiento;
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 15. Crear tabla tb_detalleMovimiento (usa FK de tb_detalle_comprobante, tb_producto y tb_movimiento)
 CREATE TABLE tb_detalleMovimiento (
     id_detalleMovimiento INT IDENTITY(1,1) PRIMARY KEY,
     cantidad INT NOT NULL CHECK (cantidad >= 0),
-    detalleComprobante INT NOT NULL,
-    producto INT NOT NULL,
-    movimiento INT NOT NULL,
-    CONSTRAINT FK_tb_detalleMovimiento_detalleComprobante FOREIGN KEY (detalleComprobante) REFERENCES tb_detalle_comprobante(id_detalleComprobante) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT FK_tb_detalleMovimiento_producto FOREIGN KEY (producto) REFERENCES tb_producto(id_producto) ON DELETE NO ACTION ON UPDATE NO ACTION,
-    CONSTRAINT FK_tb_detalleMovimiento_movimiento FOREIGN KEY (movimiento) REFERENCES tb_movimiento(id_movimiento) ON DELETE NO ACTION ON UPDATE NO ACTION
+    detalleComprobante_id INT NOT NULL,
+    producto_id INT NOT NULL,
+    movimiento_id INT NOT NULL,
+    CONSTRAINT FK_tb_detalleMovimiento_detalleComprobante FOREIGN KEY (detalleComprobante_id) REFERENCES tb_detalle_comprobante(id_detalleComprobante) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_tb_detalleMovimiento_producto FOREIGN KEY (producto_id) REFERENCES tb_producto(id_producto) ON DELETE NO ACTION ON UPDATE NO ACTION,
+    CONSTRAINT FK_tb_detalleMovimiento_movimiento FOREIGN KEY (movimiento_id) REFERENCES tb_movimiento(id_movimiento) ON DELETE NO ACTION ON UPDATE NO ACTION
 );
-INSERT INTO tb_detalleMovimiento (cantidad, detalleComprobante, producto, movimiento)
+INSERT INTO tb_detalleMovimiento (cantidad, detalleComprobante_id, producto_id, movimiento_id)
 VALUES 
-(200, 1, 1, 1), 
-(1, 1, 2, 2);
+(200, 12, 5, 1), 
+(1, 13, 6, 2);
 select * from tb_detalle_comprobante;
+select * from tb_producto;
+select * from tb_detalleMovimiento;
 -------------------------------------------------------------------------------------------------------------------------------------
 
 
