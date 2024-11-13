@@ -16,6 +16,7 @@ from gestion_venta.models import DetalleComprobante
 from django.db import transaction
 from django.utils import timezone
 import uuid 
+from django.db.models.signals import post_save
 
 
 # CRUD:
@@ -47,7 +48,9 @@ class ProductoView(APIView):
 
     @transaction.atomic
     def post(self, request):
+        #set_user_context(request.user)  # Establece el contexto del usuario
         serializer = ProductoSerializer(data=request.data)
+        
         if serializer.is_valid():
             producto = serializer.save()
 
@@ -70,27 +73,30 @@ class ProductoView(APIView):
                 movimiento=movimiento
             )
 
+            # Aquí enviamos manualmente el `user` al signal
+            post_save.send(sender=Producto, instance=producto, created=True, user=request.user)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 
     @transaction.atomic
     def put(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
-        serializer = ProductoSerializer(producto, data=request.data, partial=True)  # partial=True permite actualización parcial
-
+        serializer = ProductoSerializer(producto, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()  # La lógica de actualización de la imagen ya está manejada en el serializer
+            serializer.save(usuario=request.user)
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
+    @transaction.atomic
     def delete(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
-        producto.delete()
+        producto.delete(usuario=request.user)
         return Response({"msg": f"Producto con ID {pk_producto} ha sido eliminado"})
-    
+
 
 class CategoriaViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsAlmacen]

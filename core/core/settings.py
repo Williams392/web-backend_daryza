@@ -136,11 +136,10 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'BD_DARYZA_DJANGO',
+        'NAME': 'BD_DARYZA_DJANGO_V5',
         'USER': 'sa',
         'PASSWORD': 'root',
         'HOST': 'localhost',
-        #'PORT': '3306',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',
             'Trusted_Connection': 'yes',

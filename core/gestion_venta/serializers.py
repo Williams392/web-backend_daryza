@@ -221,22 +221,29 @@ class ComprobanteSerializer(serializers.ModelSerializer):
 
         # Añadir datos de la sucursal
         sucursal = instance.sucursal
-        representation['sucursal'] = {
-            'id_sucursal': sucursal.id_sucursal,
-            'nombre_sucursal': sucursal.nombre_sucursal,
-            'direccion_sucursal': sucursal.direccion_sucursal
-        }
+        if sucursal is not None:
+            representation['sucursal'] = {
+                'id_sucursal': sucursal.id_sucursal,
+                'nombre_sucursal': sucursal.nombre_sucursal,
+                'direccion_sucursal': sucursal.direccion_sucursal
+            }
+        else:
+            representation['sucursal'] = None  # O algún valor por defecto
 
         # Añadir datos del cliente
         cliente = instance.cliente
-        representation['cliente'] = {
-            'id_cliente': cliente.id_cliente,
-            'cliente_num_doc': cliente.ruc_cliente,
-            'cliente_razon_social': cliente.razon_socialCliente or f"{cliente.nombre_clie} {cliente.apellido_clie}",
-            'cliente_direccion': cliente.direccion_clie
-        }
+        if cliente is not None:
+            representation['cliente'] = {
+                'id_cliente': cliente.id_cliente,
+                'cliente_num_doc': cliente.ruc_cliente,
+                'cliente_razon_social': cliente.razon_socialCliente or f"{cliente.nombre_clie} {cliente.apellido_clie}",
+                'cliente_direccion': cliente.direccion_clie
+            }
+        else:
+            representation['cliente'] = None  # O algún valor por defecto
 
         return representation
+
 
 
 # class DetalleComprobanteSerializer(serializers.ModelSerializer):

@@ -85,7 +85,7 @@ class DashboardViewComprobanteSet(viewsets.ViewSet):
         
         # Obtener ventas agregadas por día de la semana
         ventas_diarias = Comprobante.objects.filter(fecha_emision__gte=fecha_inicio).extra(
-            select={'dia_semana': "DAYOFWEEK(fecha_emision)"}
+            select={'dia_semana': "DATEPART(weekday, fecha_emision)"}
         ).values('dia_semana').annotate(total_ventas=Sum('monto_Imp_Venta')).order_by('dia_semana')
         
         # Mapear los días de la semana a nombres

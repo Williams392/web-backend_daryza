@@ -1,5 +1,6 @@
 from django.contrib import admin
 from .models import *
+from django.db import models
 
 # Register your models here.
 
@@ -7,6 +8,9 @@ from .models import *
 # class MovimientoAdmin(admin.ModelAdmin):
 #     list_display = ('serie', 'correlativo', 'fecha', 'sucursal', 'tipo_movimiento')
 
+class AudotoriaAdmin(admin.ModelAdmin):
+    list_display = ('usuario_au', 'tabla', 'accion', 'fecha_hora')
+    
 class MovimientoAdmin(admin.ModelAdmin):
     list_display = ('id_movimiento', 'referencia', 'cant_total', 'tipo_movimiento', 'created_at')
 
@@ -17,6 +21,7 @@ class TipoMovimientoAdmin(admin.ModelAdmin):
     list_display = ('descripcion',)
 
 # admin.site.register(Sucursal, SucursalAdmin)
+admin.site.register(Auditoria, AudotoriaAdmin)
 admin.site.register(Movimiento, MovimientoAdmin)
 admin.site.register(DetalleMovimiento, DetalleMovimientoAdmin)
 admin.site.register(TipoMovimiento, TipoMovimientoAdmin)

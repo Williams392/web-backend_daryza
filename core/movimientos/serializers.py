@@ -1,15 +1,10 @@
 from rest_framework import serializers
 from .models import *
 
-# class SucursalSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Sucursal
-#         fields = '__all__'
-
-# class MovimientoSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Movimiento
-#         fields = '__all__'
+class AuditoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Auditoria
+        fields = '__all__'
 
 class TipoMovimientoSerializer(serializers.ModelSerializer):
     class Meta:
