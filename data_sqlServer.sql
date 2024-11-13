@@ -2,8 +2,8 @@
 -- codigo SQL SERVER:
 -- -------------------
 
-create database BD_DARYZA_DJANGO;
-use BD_DARYZA_DJANGO;
+create database BD_DARYZA_DJANGO_V5;
+use BD_DARYZA_DJANGO_V5;
 
 
 -- 1. Crear tabla tb_rol:
@@ -134,11 +134,11 @@ CREATE TABLE tb_producto (
 GO
 
 -- Inserción de datos con las columnas de fecha
-INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca_id, categoria_id, unidad_medida_id, created_at, update_at)
-VALUES 
-    ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1,  GETDATE(),  GETDATE()),
-    ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 2, 1, 1,  GETDATE(),  GETDATE());
-GO
+--INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca_id, categoria_id, unidad_medida_id, created_at, update_at)
+--VALUES 
+--    ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1,  GETDATE(),  GETDATE()),
+--    ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 2, 1, 1,  GETDATE(),  GETDATE());
+--GO
 
 -- Verificación de los datos en tb_producto
 SELECT * FROM tb_producto;
@@ -180,10 +180,10 @@ CREATE TABLE tb_legend (
     legend_value NVARCHAR(MAX) NOT NULL
 );
 GO
-INSERT INTO tb_legend (legend_code, legend_value)
-VALUES 
-('1000', 'SON VEINTITRÉS CON 60/100 SOLES'),
-('1000', 'SON VEINTITRÉS CON 60/100 SOLES');
+--INSERT INTO tb_legend (legend_code, legend_value)
+--VALUES 
+--('1000', 'SON VEINTITRÉS CON 60/100 SOLES'),
+--('1000', 'SON VEINTITRÉS CON 60/100 SOLES');
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 9. Tabla: tb_forma_pago
@@ -197,19 +197,19 @@ CREATE TABLE tb_forma_pago (
 );
 GO
 
-INSERT INTO tb_forma_pago (tipo, monto, cuota, fecha_emision, fecha_vencimiento)
-VALUES 
-('Efectivo', 150.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Tarjeta', 200.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Transferencia', 250.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Crédito', 300.00, 3, GETDATE(), DATEADD(DAY, 90, GETDATE())),
-('Debito', 120.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Cheque', 400.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Pago a plazos', 600.00, 6, GETDATE(), DATEADD(DAY, 180, GETDATE())),
-('Contado', 350.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Prepago', 90.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
-('Crédito a 6 meses', 500.00, 6, GETDATE(), DATEADD(MONTH, 6, GETDATE()));
-select * from tb_forma_pago;
+--INSERT INTO tb_forma_pago (tipo, monto, cuota, fecha_emision, fecha_vencimiento)
+--VALUES 
+--('Efectivo', 150.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Tarjeta', 200.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Transferencia', 250.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Crédito', 300.00, 3, GETDATE(), DATEADD(DAY, 90, GETDATE())),
+--('Debito', 120.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Cheque', 400.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Pago a plazos', 600.00, 6, GETDATE(), DATEADD(DAY, 180, GETDATE())),
+--('Contado', 350.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Prepago', 90.00, 1, GETDATE(), DATEADD(DAY, 30, GETDATE())),
+--('Crédito a 6 meses', 500.00, 6, GETDATE(), DATEADD(MONTH, 6, GETDATE()));
+--select * from tb_forma_pago;
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 10. Crear tabla tb_sucursal (usada como FK en tb_comprobante y tb_movimiento)
@@ -268,16 +268,16 @@ CREATE TABLE tb_comprobante (
 GO
 -- Asegúrate de que los IDs en los campos de claves foráneas ya existan en sus respectivas tablas.
 -- Insertar datos en tb_comprobante
-INSERT INTO tb_comprobante (
-    tipo_operacion, tipo_doc, numero_serie, correlativo, tipo_moneda, fecha_emision, hora_emision,
-    empresa_ruc, razon_social, nombre_comercial, urbanizacion, distrito, departamento, email_empresa, telefono_emp, 
-    cliente_tipo_doc, monto_Oper_Gravadas, monto_Igv, valor_venta, sub_Total, monto_Imp_Venta, estado_Documento, 
-    manual, pdf_url, cliente_id, usuario_id, forma_pago_id, legend_comprobante_id
-) VALUES
-('001', 'B001', '0010', '000001', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 1', 'Lima', 'Lima', 'info@daryza.com', '01-2345678', '12345678', 1000.00, 180.00, 1180.00, 1180.00, 1180.00, '1', 0, 'http://url.com/comprobante1.pdf', 1, 1, 1, 1),
-('002', 'B002', '0020', '000002', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 2', 'Miraflores', 'Lima', 'ventas@daryza.com', '01-8765432', '12345678', 500.00, 90.00, 590.00, 590.00, 590.00, '1', 0, 'http://url.com/comprobante2.pdf', 2, 2, 2, 1);
--- Verificar los datos insertados
-SELECT * FROM tb_comprobante;
+--INSERT INTO tb_comprobante (
+--    tipo_operacion, tipo_doc, numero_serie, correlativo, tipo_moneda, fecha_emision, hora_emision,
+--    empresa_ruc, razon_social, nombre_comercial, urbanizacion, distrito, departamento, email_empresa, telefono_emp, 
+--    cliente_tipo_doc, monto_Oper_Gravadas, monto_Igv, valor_venta, sub_Total, monto_Imp_Venta, estado_Documento, 
+--    manual, pdf_url, cliente_id, usuario_id, forma_pago_id, legend_comprobante_id
+--) VALUES
+--('001', 'B001', '0010', '000001', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 1', 'Lima', 'Lima', 'info@daryza.com', '01-2345678', '12345678', 1000.00, 180.00, 1180.00, 1180.00, 1180.00, '1', 0, 'http://url.com/comprobante1.pdf', 1, 1, 1, 1),
+--('002', 'B002', '0020', '000002', 'PEN', GETDATE(), GETDATE(), '20512345678', 'Daryza S.A.C.', 'Daryza', 'Urbanización 2', 'Miraflores', 'Lima', 'ventas@daryza.com', '01-8765432', '12345678', 500.00, 90.00, 590.00, 590.00, 590.00, '1', 0, 'http://url.com/comprobante2.pdf', 2, 2, 2, 1);
+---- Verificar los datos insertados
+--SELECT * FROM tb_comprobante;
 
 
 SELECT * 
@@ -306,16 +306,16 @@ CREATE TABLE tb_detalle_comprobante (
 );
 GO
 -- Inserción de datos en tb_detalle_comprobante
-INSERT INTO tb_detalle_comprobante (
-    unidad, cantidad, id_producto, descripcion, monto_valorUnitario, 
-    igv_detalle, monto_Precio_Unitario, monto_Valor_Venta, 
-    fecha_emision, hora_emision, comprobante_id, producto_id
-)
-VALUES 
-('KG', 5, 'P001', 'Detergente Líquido', 15.00, 2.70, 150.00, 162.70, GETDATE(), GETDATE(), 1, 5),
-('LT', 6, 'P002', 'Limpiador Multiusos', 20.00, 3.60, 100.00, 106.60, GETDATE(), GETDATE(), 2, 6);
+--INSERT INTO tb_detalle_comprobante (
+--    unidad, cantidad, id_producto, descripcion, monto_valorUnitario, 
+--    igv_detalle, monto_Precio_Unitario, monto_Valor_Venta, 
+--    fecha_emision, hora_emision, comprobante_id, producto_id
+--)
+--VALUES 
+--('KG', 1, 'P001', 'Detergente Líquido', 15.00, 2.70, 150.00, 162.70, GETDATE(), GETDATE(), 1, 1),
+--('LT', 2, 'P002', 'Limpiador Multiusos', 20.00, 3.60, 100.00, 106.60, GETDATE(), GETDATE(), 2, 2);
 
-SELECT * FROM tb_detalle_comprobante;
+--SELECT * FROM tb_detalle_comprobante;
 ---------------------------------------------------------------------------------------------------------------------------------
 -- 13. Crear tabla tb_tipoMovimiento
 CREATE TABLE tb_tipoMovimiento (
@@ -364,11 +364,13 @@ CREATE TABLE tb_detalleMovimiento (
 );
 INSERT INTO tb_detalleMovimiento (cantidad, detalleComprobante_id, producto_id, movimiento_id)
 VALUES 
-(200, 12, 5, 1), 
-(1, 13, 6, 2);
+(200, 3, 1, 1), 
+(1, 4, 2, 2);
+
 select * from tb_detalle_comprobante;
 select * from tb_producto;
 select * from tb_detalleMovimiento;
+go
 -------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -390,14 +392,19 @@ create table AUDITORIA ( -- NUEVA TABLA:
 )
 GO
 
--- TRIGGER INSERTAR PARA tb_producto
+-- Trigger INSERTAR para tb_producto
+-- Trigger INSERTAR para tb_producto
 CREATE TRIGGER TR_AuditoriaP_Insertar
 ON tb_producto
 FOR INSERT
 AS
 BEGIN
+    DECLARE @user_id NVARCHAR(50);
+    -- Obtener el contexto del usuario
+    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
+
     INSERT INTO AUDITORIA 
-    SELECT 'DESCONOCIDO', 'PRODUCTO', 'INSERTÓ', 
+    SELECT @user_id, 'PRODUCTO', 'INSERTÓ-2', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            'NINGUNA', 
@@ -406,24 +413,20 @@ BEGIN
 END;
 GO
 
-INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca, categoria, unidad_medida)
-VALUES ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1);
-GO
 
-SELECT * FROM tb_producto;
-SELECT * FROM AUDITORIA;
-GO
 
--------------------------------------
-
--- TRIGGER ELIMINAR PARA tb_producto
+-- Trigger ELIMINAR para tb_producto
 CREATE TRIGGER TR_AuditoriaP_Eliminar
 ON tb_producto
 FOR DELETE
 AS
 BEGIN
+    DECLARE @user_id NVARCHAR(50);
+    -- Obtener el contexto del usuario
+    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
+
     INSERT INTO AUDITORIA 
-    SELECT 'DESCONOCIDO', 'PRODUCTO', 'ELIMINÓ', 
+    SELECT @user_id, 'PRODUCTO', 'ELIMINÓ', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            'NINGUNA', 
@@ -432,24 +435,18 @@ BEGIN
 END;
 GO
 
-DELETE FROM tb_producto
-WHERE id_producto = 2;  
-GO
-
-SELECT * FROM tb_producto;
-SELECT * FROM AUDITORIA;
-GO
-
--------------------------------------
-
--- TRIGGER ACTUALIZAR PARA tb_producto
+-- Trigger ACTUALIZAR para tb_producto
 CREATE TRIGGER TR_AuditoriaP_Actualizar
 ON tb_producto
 FOR UPDATE
 AS
 BEGIN
+    DECLARE @user_id NVARCHAR(50);
+    -- Obtener el contexto del usuario
+    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
+
     INSERT INTO AUDITORIA 
-    SELECT 'DESCONOCIDO', 'PRODUCTO', 'ACTUALIZÓ', 
+    SELECT @user_id, 'PRODUCTO', 'ACTUALIZÓ', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            (SELECT nombre_prod FROM deleted), 
@@ -458,11 +455,21 @@ BEGIN
 END;
 GO
 
-UPDATE tb_producto
-SET nombre_prod = 'Producto A Actualizado'
-WHERE id_producto = 3; 
-GO
+
 
 -- Verificar auditoría
 SELECT * FROM tb_producto;
 SELECT * FROM AUDITORIA;
+
+
+-- Eliminar el trigger de inserción
+DROP TRIGGER IF EXISTS TR_AuditoriaP_Insertar;
+GO
+
+-- Eliminar el trigger de eliminación
+DROP TRIGGER IF EXISTS TR_AuditoriaP_Eliminar;
+GO
+
+-- Eliminar el trigger de actualización
+DROP TRIGGER IF EXISTS TR_AuditoriaP_Actualizar;
+GO
