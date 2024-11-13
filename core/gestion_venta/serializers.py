@@ -17,11 +17,11 @@ class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cliente
         fields = ['id_cliente', 'nombre_clie', 'apellido_clie', 
-                  'dni_cliente', 'ruc_cliente','direccion_clie', 'razon_socialCliente',
+                  'dni_cliente', 'ruc_cliente', 'direccion_clie', 'razon_socialCliente',
                   'tipo_empresa', 'email_cliente', 'telefono_cliente']
         extra_kwargs = {
-            'dni_cliente': {'required': False},
-            'ruc_cliente': {'required': True}
+            'dni_cliente': {'required': True},
+            'ruc_cliente': {'required': False, 'allow_null': True}  # Permite null para ruc_cliente
         }
 
     def validate(self, data):

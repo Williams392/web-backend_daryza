@@ -2,11 +2,16 @@
 from datetime import timedelta
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from django.db.models import Sum
 from django.utils.timezone import now
 from rest_framework import viewsets
 
-
+from gestion_venta.models import Comprobante
 from gestion_venta.models import Cliente
+from authentication.models import CustomUser
+from gestion_almacen.models import Producto 
+from movimientos.models import Movimiento, TipoMovimiento
+
 class DashboardViewClienteSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
@@ -29,7 +34,6 @@ class DashboardViewClienteSet(viewsets.ViewSet):
         })
 
 
-from gestion_almacen.models import Producto 
 class DashboardViewProductoSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
@@ -50,10 +54,10 @@ class DashboardViewProductoSet(viewsets.ViewSet):
             "total_productos": total_productos,
             "porcentaje_aumento_producto": porcentaje_aumento_producto
         })
-    
-    
-from gestion_venta.models import Comprobante
+
+
 class DashboardViewComprobanteSet(viewsets.ViewSet):
+
     @action(detail=False, methods=['get'])
     def conteo_y_aumento_comprobantes(self, request):
         total_comprobantes = Comprobante.objects.count()
@@ -73,7 +77,24 @@ class DashboardViewComprobanteSet(viewsets.ViewSet):
             "porcentaje_aumento_comprobantes": porcentaje_aumento_comprobantes
         })
     
-from authentication.models import CustomUser
+    @action(detail=False, methods=['get'])
+    def ventas_por_dia_semana(self, request):
+        # Obtener la fecha actual y la fecha de hace 7 días
+        fecha_actual = now()
+        fecha_inicio = fecha_actual - timedelta(days=7)
+        
+        # Obtener ventas agregadas por día de la semana
+        ventas_diarias = Comprobante.objects.filter(fecha_emision__gte=fecha_inicio).extra(
+            select={'dia_semana': "DAYOFWEEK(fecha_emision)"}
+        ).values('dia_semana').annotate(total_ventas=Sum('monto_Imp_Venta')).order_by('dia_semana')
+        
+        # Mapear los días de la semana a nombres
+        dias_semana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+        ventas_diarias = [{**venta, 'dia_semana': dias_semana[int(venta['dia_semana']) - 1]} for venta in ventas_diarias]
+        
+        return Response(ventas_diarias)
+    
+    
 class DashboardViewUsuarioSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
@@ -94,3 +115,5 @@ class DashboardViewUsuarioSet(viewsets.ViewSet):
             "total_usuarios": total_usuarios,
             "porcentaje_aumento_usuarios": porcentaje_aumento_usuarios
         })
+
+

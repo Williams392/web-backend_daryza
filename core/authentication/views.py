@@ -20,8 +20,7 @@ from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import IsAdmin
 
 from rest_framework.permissions import AllowAny  # Importar AllowAny para permitir el acceso sin autenticación
-
-
+  
 # Inicio de sesión
 class InicioSesionView(APIView):
     permission_classes = [AllowAny]  # Permitir acceso sin autenticación

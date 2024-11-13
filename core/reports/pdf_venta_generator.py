@@ -75,8 +75,7 @@ def generar_pdf_comprobante(comprobante_data):
     c.drawString(30, height - 210, f"Fecha de Emisión: {comprobante_data.get('fecha_emision', 'No disponible')}")
     c.drawString(30, height - 225, f"Hora de Emisión: {comprobante_data.get('hora_emision', 'No disponible')}")
 
-    # Ajustar la posición de la tabla de productos: -------------------------------------------------------------------------------
-
+    # Tabla de productos: -------------------------------------------------------------------------------
     y_position = height - 250  # Ajustar la posición vertical de la tabla
     detalle_data = comprobante_data['detalle']
     table_data = [["ID", "DECRIPCIÓN", "CANT.", "UNIDAD", "V. UNITARIO", "IGV", "P. UNIT"]]
@@ -135,3 +134,4 @@ def generar_pdf_comprobante(comprobante_data):
 
     c.save()
     return output_path
+

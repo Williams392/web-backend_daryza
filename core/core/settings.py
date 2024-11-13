@@ -121,14 +121,30 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Ahora debe de ser de esta forma: python manage.py migrate --database=secondary
 # DATABASE_ROUTERS = ['core.db_routers.AuthRouter']
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'bd_daryza_v1',
+#         'USER': 'root',
+#         'PASSWORD': 'root',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     },
+# }
+
+# SQL SERVER:
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'bd_daryza_v1',
-        'USER': 'root',
+        'ENGINE': 'mssql',
+        'NAME': 'BD_DARYZA_DJANGO',
+        'USER': 'sa',
         'PASSWORD': 'root',
         'HOST': 'localhost',
-        'PORT': '3306',
+        #'PORT': '3306',
+        'OPTIONS': {
+            'driver': 'ODBC Driver 17 for SQL Server',
+            'Trusted_Connection': 'yes',
+        },
     },
 }
 
@@ -174,6 +190,7 @@ REST_FRAMEWORK = {
 #     ],
 # }
 
+# lunes - 12/11/24:
 # AUTHENTICATION_BACKENDS = [
 #     'path.to.EmailBackend',  
 #     'django.contrib.auth.backends.ModelBackend',
