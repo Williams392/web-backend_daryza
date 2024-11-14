@@ -79,22 +79,19 @@ class DashboardViewComprobanteSet(viewsets.ViewSet):
     
     @action(detail=False, methods=['get'])
     def ventas_por_dia_semana(self, request):
-        # Obtener la fecha actual y la fecha de hace 7 días
         fecha_actual = now()
         fecha_inicio = fecha_actual - timedelta(days=7)
         
-        # Obtener ventas agregadas por día de la semana
         ventas_diarias = Comprobante.objects.filter(fecha_emision__gte=fecha_inicio).extra(
             select={'dia_semana': "DATEPART(weekday, fecha_emision)"}
         ).values('dia_semana').annotate(total_ventas=Sum('monto_Imp_Venta')).order_by('dia_semana')
         
-        # Mapear los días de la semana a nombres
         dias_semana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
         ventas_diarias = [{**venta, 'dia_semana': dias_semana[int(venta['dia_semana']) - 1]} for venta in ventas_diarias]
         
         return Response(ventas_diarias)
     
-    
+
 class DashboardViewUsuarioSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
