@@ -1160,3 +1160,46 @@ SELECT * FROM tb_detalleMovimiento;
 SELECT * FROM AUDITORIA;
 GO
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------
+-------------------------DASHBOARD ---------------------------------
+--------------------------------------------------------------------
+use BD_DARYZA_DJANGO_V5
+select * from tb_comprobante
+
+--- Ventas Diarias por Dia de la Semana:
+
+-- 1. Actualizar del id 1 al 4 a la fecha 2024-11-11:
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-11'
+WHERE id_comprobante BETWEEN 1 AND 4;
+
+-- 2. Actualizar del id 5 al 9 a la fecha 2024-11-12:
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-12'
+WHERE id_comprobante BETWEEN 5 AND 9;
+
+-- 3. Actualizar del id 10 al 17 a la fecha 2024-11-14:
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-14'
+WHERE id_comprobante BETWEEN 10 AND 17;
+
+-- 4. Actualizar del id 18 al 21 a la fecha 2024-11-15:
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-15'
+WHERE id_comprobante BETWEEN 18 AND 21;
+
+

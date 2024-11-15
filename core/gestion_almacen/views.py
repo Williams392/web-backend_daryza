@@ -17,9 +17,8 @@ from django.db import transaction
 from django.utils import timezone
 import uuid 
 from django.db.models.signals import post_save
+import re 
 
-
-# CRUD:
 class ProductoFilter(filters.FilterSet):
     nombre_prod = filters.CharFilter(lookup_expr='icontains') 
     marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  
@@ -29,6 +28,7 @@ class ProductoFilter(filters.FilterSet):
         model = Producto
         fields = ['nombre_prod', 'codigo', 'marca', 'categoria']
 
+# CRUD:
 class ProductoView(APIView):
     permission_classes = [IsAuthenticated, IsAlmacen]
     # quite el permiso para el user ventas puede aceder a producto.
@@ -48,32 +48,28 @@ class ProductoView(APIView):
 
     @transaction.atomic
     def post(self, request):
-        #set_user_context(request.user)  # Establece el contexto del usuario
         serializer = ProductoSerializer(data=request.data)
         
         if serializer.is_valid():
             producto = serializer.save()
 
-            # Crear el movimiento de entrada
             tipo_movimiento = TipoMovimiento.objects.get(descripcion='Entrada')
             movimiento = Movimiento.objects.create(
                 referencia='Ingreso de productos',
                 cant_total=producto.estock,
-                sucursal_id=1,  # Sucursal, puedes cambiar esto según tu lógica
-                usuario=request.user,  # Usuario que crea el producto
+                sucursal_id=1,
+                usuario=request.user,
                 tipo_movimiento=tipo_movimiento,
                 created_at=timezone.now(),
                 updated_at=timezone.now()
             )
 
-            # Crear el detalle del movimiento sin detalleComprobante
             DetalleMovimiento.objects.create(
                 cantidad=producto.estock,
                 producto=producto,
                 movimiento=movimiento
             )
 
-            # Aquí enviamos manualmente el `user` al signal
             post_save.send(sender=Producto, instance=producto, created=True, user=request.user)
 
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -58,7 +58,7 @@ class Producto(models.Model):
     descripcion_pro = models.TextField(blank=True, null=True)
     precio_compra = models.DecimalField(max_digits=10, decimal_places=2)
     precio_venta = models.DecimalField(max_digits=10, decimal_places=2)
-    codigo = models.CharField(max_length=100)
+    codigo = models.CharField(max_length=100, unique=True) 
     estado = models.BooleanField(default=True)
     estock = models.IntegerField()
     estock_minimo = models.IntegerField()

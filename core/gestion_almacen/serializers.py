@@ -56,25 +56,38 @@ class ProductoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Producto
         fields = '__all__'
+        extra_kwargs = {
+            'codigo': {'required': False}
+        }
 
     def validate(self, data):
-        print("Validando datos:", data)  # Imprimir los datos que se están validando
-
         if data['precio_venta'] <= data['precio_compra']: 
-            print("Error: El precio de compra debe ser mayor que el precio de venta.")
             raise serializers.ValidationError("El precio de compra debe ser mayor que el precio de venta.")
-
         if data['estock'] <= data['estock_minimo']:
-            print("Error: El estock debe ser mayor que el estock mínimo y no pueden ser iguales.")
             raise serializers.ValidationError("El estock debe ser mayor que el estock mínimo y no pueden ser iguales.")
-            
-        instance = self.instance
-
-        if instance and instance.nombre_prod != data['nombre_prod']:
-            if Producto.objects.filter(nombre_prod=data['nombre_prod']).exists():
-                raise serializers.ValidationError({"nombre_prod": "El nombre del producto ya existe."})
-
         return data
+    
+    def create(self, validated_data):
+        producto = Producto.objects.create(**validated_data)
+        producto.codigo = f'P-{producto.id_producto:09d}'
+        producto.save()
+        return producto
+
+    # def create(self, validated_data):
+    #     if 'codigo' not in validated_data or not validated_data['codigo']:
+    #         last_product = Producto.objects.all().order_by('id_producto').last()
+    #         if last_product and last_product.codigo.startswith('P-'):
+    #             try:
+    #                 last_number = int(last_product.codigo.split('-')[1])
+    #                 new_number = last_number + 1
+    #                 validated_data['codigo'] = f'P-{new_number:07d}'
+    #             except (IndexError, ValueError):
+    #                 validated_data['codigo'] = 'P-00001'
+    #         else:
+    #             validated_data['codigo'] = 'P-00001'
+        
+    #     producto = Producto.objects.create(**validated_data)
+    #     return producto
 
     def update(self, instance, validated_data):
         # Manejo especial para el archivo de imagen, si es proporcionado
