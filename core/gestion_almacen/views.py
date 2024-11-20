@@ -76,7 +76,6 @@ class ProductoView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-
     @transaction.atomic
     def put(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
@@ -90,7 +89,8 @@ class ProductoView(APIView):
     @transaction.atomic
     def delete(self, request, pk_producto=None):
         producto = get_object_or_404(Producto, pk=pk_producto)
-        producto.delete(usuario=request.user)
+        #producto.delete(usuario=request.user)
+        producto.delete()
         return Response({"msg": f"Producto con ID {pk_producto} ha sido eliminado"})
 
 

@@ -4,10 +4,6 @@ from django.db import models
 
 # Register your models here.
 
-
-# class MovimientoAdmin(admin.ModelAdmin):
-#     list_display = ('serie', 'correlativo', 'fecha', 'sucursal', 'tipo_movimiento')
-
 class AudotoriaAdmin(admin.ModelAdmin):
     list_display = ('usuario_au', 'tabla', 'accion', 'fecha_hora')
     

@@ -42,6 +42,7 @@ class UnidadMedida(models.Model):
     id_unidadMedida = models.AutoField(primary_key=True)
     nombre_unidad = models.CharField(max_length=100, unique=True)
     abreviacion = models.CharField(max_length=100, unique=True)
+    estado_unidad = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     update_at = models.DateTimeField(auto_now=True)
 

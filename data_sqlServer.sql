@@ -2,11 +2,64 @@
 -- codigo SQL SERVER:
 -- -------------------
 
-create database BD_DARYZA_DJANGO_V5;
-use BD_DARYZA_DJANGO_V5;
+create database BD_DARYZA_DJANGO_V6;
+use BD_DARYZA_DJANGO_V6;
 
 
--- 1. Crear tabla tb_rol:
+-- INSERT RAPITDO PARA EL SISTEMAl:
+INSERT INTO tb_rol (name_role) VALUES
+('Asignar'),
+('Administrador'),
+('Ventas'),
+('Almacen');
+
+INSERT INTO tb_sucursal (nombre_sucursal, descripcion, telf_suc, correo_suc, direccion_sucursal) VALUES
+('Daryza S.A.C lurin', 'Panamericana Sur, luirn', '99293948', 'webmaster@daryza.com', 'km30, antigua panamericana Sur, luirn');
+
+INSERT INTO tb_tipoMovimiento (descripcion) VALUES
+('Entrada'),
+('Salida');
+
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion)
+VALUES 
+('Juan', 'Pérez', 'Av. Principal 123', '12345678', '20123456789', 'Natural', 'juan.perez@example.com', '987654321', GETDATE()),
+('María', 'Gómez', 'Calle Secundaria 456', '23456789', '20123456790', 'Natural', 'maria.gomez@example.com', '987654322', GETDATE()),
+('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
+('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
+('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
+SELECT * FROM tb_cliente;
+
+---------------------------------------------------------------------------------------------------
+-- MODIFICANDO LAS FECHAS:
+
+select * from tb_comprobante;
+-- fecha_emision
+
+-- Cambiar la fecha de emisión del 1 al 5
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-19'
+WHERE id_comprobante BETWEEN 1 AND 2;
+
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-18'
+WHERE id_comprobante BETWEEN 3 AND 5;
+
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-17'
+WHERE id_comprobante BETWEEN 4 AND 6;
+
+-- Cambiar la fecha de emisión del 6 al 10
+UPDATE tb_comprobante
+SET fecha_emision = '2024-11-16'
+WHERE id_comprobante BETWEEN 7 AND 10;
+
+-- Verificar los cambios realizados
+SELECT * FROM tb_comprobante;
+
+
+-------------------------------------------------------------------------------------------------------------------------------------
+-- BASE DE DATOS:
+
 CREATE TABLE tb_rol (
     id_rol INT IDENTITY(1,1) PRIMARY KEY,
     name_role NVARCHAR(50) UNIQUE NOT NULL
@@ -18,7 +71,6 @@ INSERT INTO tb_rol (name_role) VALUES
 ('Ventas'),
 ('Almacen');
 
--------------------------------------------------------------------------------------------------------------------------------------
 -- 2. tabla actual de django:
 CREATE TABLE tb_usuario (
     id_user INT IDENTITY(1,1) PRIMARY KEY,
@@ -40,9 +92,14 @@ CREATE TABLE tb_usuario (
 );
 GO
 INSERT INTO tb_usuario (username, email, phone_number, password, name_role_id, created, modified, is_superuser, is_staff, is_active, date_joined) VALUES
-('kevin1', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 1, 1, 1, SYSDATETIME()),
-('Sebas2', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME());
+('Kevin', 'kevin1@gmail.com', '+51999999991', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 1, 1, 1, SYSDATETIME()),
+('Sebas', 'sebas2@gmail.com', '+51999999992', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME()),
+('Lucia', 'lucia3@gmail.com', '+51999999993', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 0, 1, 1, SYSDATETIME()),
+('Mario', 'mario4@gmail.com', '+51999999994', 'admin123456', 3, SYSDATETIME(), SYSDATETIME(), 0, 0, 1, SYSDATETIME()),
+('Ana', 'ana5@gmail.com', '+51999999995', 'admin123456', 2, SYSDATETIME(), SYSDATETIME(), 1, 1, 1, SYSDATETIME());
 
+-- Verificar los cambios realizados
+SELECT * FROM tb_usuario;
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 3. Crear tabla tb_categoria (usada como FK en tb_producto)
 CREATE TABLE tb_categoria (
@@ -93,21 +150,22 @@ CREATE TABLE tb_unidadMedida (
     id_unidadMedida INT IDENTITY(1,1) PRIMARY KEY,
     nombre_unidad NVARCHAR(100) NOT NULL,
     abreviacion NVARCHAR(100) NOT NULL,
+	estado_unidad BIT DEFAULT 1,
     created_at DATETIME DEFAULT GETDATE(),
     update_at DATETIME DEFAULT GETDATE()
 );
 GO
-INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, created_at, update_at) VALUES
-('Litro', 'L', GETDATE(), GETDATE()),
-('Mililitro', 'ml', GETDATE(), GETDATE()),
-('Galón', 'gal', GETDATE(), GETDATE()),
-('Onza', 'oz', GETDATE(), GETDATE()),
-('Kilogramo', 'kg', GETDATE(), GETDATE()),
-('Gramo', 'g', GETDATE(), GETDATE()),
-('Unidad', 'u', GETDATE(), GETDATE()),
-('Paquete', 'paq', GETDATE(), GETDATE()),
-('Caja', 'caja', GETDATE(), GETDATE()),
-('Botella', 'bot', GETDATE(), GETDATE());
+INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, estado_unidad, created_at, update_at) VALUES
+('Litro', 'L', 1,GETDATE(), GETDATE()),
+('Mililitro', 'ml', 1, GETDATE(), GETDATE()),
+('Galón', 'gal', 1, GETDATE(), GETDATE()),
+('Onza', 'oz', 1, GETDATE(), GETDATE()),
+('Kilogramo', 'kg', 1, GETDATE(), GETDATE()),
+('Gramo', 'g', 1, GETDATE(), GETDATE()),
+('Unidad', 'u', 1, GETDATE(), GETDATE()),
+('Paquete', 'paq', 1, GETDATE(), GETDATE()),
+('Caja', 'caja', 1, GETDATE(), GETDATE()),
+('Botella', 'bot', 1, GETDATE(), GETDATE());
 
 -------------------------------------------------------------------------------------------------------------------------------------
 -- 6. Crear tabla tb_producto (usa FK de tb_marca, tb_categoria, tb_unidadMedida)
@@ -134,11 +192,11 @@ CREATE TABLE tb_producto (
 GO
 
 -- Inserción de datos con las columnas de fecha
---INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca_id, categoria_id, unidad_medida_id, created_at, update_at)
---VALUES 
---    ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1,  GETDATE(),  GETDATE()),
---    ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 2, 1, 1,  GETDATE(),  GETDATE());
---GO
+INSERT INTO tb_producto (nombre_prod, descripcion_pro, precio_compra, precio_venta, codigo, estado, estock, estock_minimo, marca_id, categoria_id, unidad_medida_id, created_at, update_at)
+VALUES 
+    ('Producto A', 'Descripción del Producto A', 10.00, 15.00, 'P001', 1, 100, 10, 1, 1, 1,  GETDATE(),  GETDATE()),
+    ('Producto B', 'Descripción del Producto B', 20.00, 25.00, 'P002', 1, 100, 10, 2, 1, 1,  GETDATE(),  GETDATE());
+GO
 
 -- Verificación de los datos en tb_producto
 SELECT * FROM tb_producto;
@@ -163,13 +221,24 @@ CREATE TABLE tb_cliente (
 );
 GO
 
-INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion)
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion)
 VALUES 
-('Juan', 'Pérez', 'Av. Principal 123', '12345678', '20123456789', 'Natural', 'juan.perez@example.com', '987654321', GETDATE()),
-('María', 'Gómez', 'Calle Secundaria 456', '23456789', '20123456790', 'Natural', 'maria.gomez@example.com', '987654322', GETDATE()),
-('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
-('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
-('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
+('Juan', 'Pérez', 'Av. Principal 123', '12345678', '20123456789', 'Comercializadora Daryza S.A.C.', 'Natural', 'juan.perez@example.com', '987654321', GETDATE()),
+('María', 'Gómez', 'Calle Secundaria 456', '23456789', '20123456790', 'Servicios Integrales Lurín S.A.C.', 'Natural', 'maria.gomez@example.com', '987654322', GETDATE()),
+('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Distribuidora Global S.A.C.', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
+('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Innovaciones Tecnológicas S.A.C.', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
+('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Soluciones Empresariales Daryza S.A.C.', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
+
+-- Cinco clientes adicionales
+INSERT INTO tb_cliente (nombre_clie, apellido_clie, direccion_clie, dni_cliente, ruc_cliente, razon_socialCliente, tipo_empresa, email_cliente, telefono_cliente, fecha_creacion)
+VALUES 
+('Pedro', 'Ramírez', 'Av. Las Flores 303', '67890123', '20123456794', 'Tecnología y Servicios Daryza S.A.C.', 'Natural', 'pedro.ramirez@example.com', '987654326', GETDATE()),
+('Lucía', 'Fernández', 'Calle Los Pinos 404', '78901234', '20123456795', 'Comercializadora Global Lurín S.A.C.', 'Natural', 'lucia.fernandez@example.com', '987654327', GETDATE()),
+('Miguel', 'Torres', 'Jr. Las Palmeras 505', '89012345', '20123456796', 'Innovaciones Empresariales S.A.C.', 'Natural', 'miguel.torres@example.com', '987654328', GETDATE()),
+('Elena', 'Rojas', 'Paseo de la Marina 606', '90123456', '20123456797', 'Distribuciones y Logística S.A.C.', 'Natural', 'elena.rojas@example.com', '987654329', GETDATE()),
+('Roberto', 'Castro', 'Av. Los Álamos 707', '01234567', '20123456798', 'Servicios y Soluciones Daryza S.A.C.', 'Natural', 'roberto.castro@example.com', '987654330', GETDATE());
+
+-- Verificar los cambios realizados
 SELECT * FROM tb_cliente;
 
 -------------------------------------------------------------------------------------------------------------------------------------
@@ -454,7 +523,6 @@ BEGIN
     FROM inserted;
 END;
 GO
-
 
 
 -- Verificar auditoría

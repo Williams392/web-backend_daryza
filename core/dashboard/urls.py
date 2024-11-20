@@ -7,6 +7,7 @@ router.register(r'productos', DashboardViewProductoSet, basename='dashboard-prod
 router.register(r'clientes', DashboardViewClienteSet, basename='dashboard-clientes') 
 router.register(r'comprobantes', DashboardViewComprobanteSet, basename='dashboard-comprobantes') 
 router.register(r'usuarios', DashboardViewUsuarioSet, basename='dashboard-usuarios')
+router.register(r'movimientos', DashboardVieMovieminentoSet, basename='dashboard-movimiento')
 
 urlpatterns = [
 
