@@ -19,6 +19,8 @@ import uuid
 from django.db.models.signals import post_save
 import re 
 
+#from core.utils import set_user_context
+
 class ProductoFilter(filters.FilterSet):
     nombre_prod = filters.CharFilter(lookup_expr='icontains') 
     marca = filters.CharFilter(field_name='marca__nombre', lookup_expr='icontains')  
@@ -48,6 +50,9 @@ class ProductoView(APIView):
 
     @transaction.atomic
     def post(self, request):
+        # Establece el usuario logueado en el contexto
+        # set_user_context(request.user)
+        
         serializer = ProductoSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -78,6 +83,8 @@ class ProductoView(APIView):
     
     @transaction.atomic
     def put(self, request, pk_producto=None):
+        # Establece el usuario logueado en el contexto
+        # set_user_context(request.user)
         producto = get_object_or_404(Producto, pk=pk_producto)
         serializer = ProductoSerializer(producto, data=request.data, partial=True)
         if serializer.is_valid():
@@ -109,8 +116,13 @@ class MarcaViewSet(viewsets.ModelViewSet):
     filterset_fields = ['nombre_marca', 'estado_marca']
 
 class UnidadMedidaViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, IsAlmacen]
     queryset = UnidadMedida.objects.all()
+    permission_classes = [IsAuthenticated, IsAlmacen]
     serializer_class = UnidadMedidaSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['nombre_unidad', 'abreviacion']
+
+    # def get_serializer_context(self):
+    #     context = super().get_serializer_context()
+    #     context['user'] = self.request.user
+    #     return context

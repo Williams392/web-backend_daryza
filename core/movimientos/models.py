@@ -6,7 +6,7 @@ import uuid
 
 class Auditoria(models.Model):
     codigo_au = models.AutoField(primary_key=True)
-    usuario_au = models.CharField(max_length=50)
+    usuario_au = models.CharField(max_length=128, null=False)
     tabla = models.CharField(max_length=50)
     accion = models.CharField(max_length=20)
     registro = models.CharField(max_length=20)

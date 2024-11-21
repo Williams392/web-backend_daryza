@@ -136,7 +136,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'mssql',
-        'NAME': 'BD_DARYZA_DJANGO_V6',
+        'NAME': 'BD_DARYZA_DJANGO_V7',
         'USER': 'sa',
         'PASSWORD': 'root',
         'HOST': 'localhost',

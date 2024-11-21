@@ -2,8 +2,8 @@
 -- codigo SQL SERVER:
 -- -------------------
 
-create database BD_DARYZA_DJANGO_V6;
-use BD_DARYZA_DJANGO_V6;
+create database BD_DARYZA_DJANGO_V7;
+use BD_DARYZA_DJANGO_V7;
 
 
 -- INSERT RAPITDO PARA EL SISTEMAl:
@@ -27,13 +27,47 @@ VALUES
 ('Luis', 'Martínez', 'Jr. Los Olivos 789', '34567890', '20123456791', 'Natural', 'luis.martinez@example.com', '987654323', GETDATE()),
 ('Ana', 'López', 'Paseo de la República 101', '45678901', '20123456792', 'Natural', 'ana.lopez@example.com', '987654324', GETDATE()),
 ('Carlos', 'Sánchez', 'Av. Los Jardines 202', '56789012', '20123456793', 'Natural', 'carlos.sanchez@example.com', '987654325', GETDATE());
-SELECT * FROM tb_cliente;
 
----------------------------------------------------------------------------------------------------
--- MODIFICANDO LAS FECHAS:
+INSERT INTO tb_categoria (nombre_categoria, estado_categoria, created_at, update_at) VALUES
+('Detergente Líquido', 1, GETDATE(), GETDATE()),
+('Desinfectante', 1, GETDATE(), GETDATE()),
+('Jabón Líquido', 1, GETDATE(), GETDATE()),
+('Lejía', 1, GETDATE(), GETDATE()),
+('Suavizante', 1, GETDATE(), GETDATE()),
+('Limpiador Multiusos', 1, GETDATE(), GETDATE()),
+('Desengrasante', 1, GETDATE(), GETDATE()),
+('Aromatizador', 1, GETDATE(), GETDATE()),
+('Cera Líquida', 1, GETDATE(), GETDATE()),
+('Lavavajillas', 1, GETDATE(), GETDATE());
 
-select * from tb_comprobante;
--- fecha_emision
+INSERT INTO tb_marca (nombre_marca, estado_marca, created_at, update_at) VALUES
+('Daryza', 1, GETDATE(), GETDATE()),
+('Clorox', 1, GETDATE(), GETDATE()),
+('Lysol', 1, GETDATE(), GETDATE()),
+('Mr. Clean', 1, GETDATE(), GETDATE()),
+('Fabuloso', 1, GETDATE(), GETDATE()),
+('Ajax', 1, GETDATE(), GETDATE()),
+('Pine-Sol', 1, GETDATE(), GETDATE()),
+('Windex', 1, GETDATE(), GETDATE()),
+('Scrubbing Bubbles', 1, GETDATE(), GETDATE()),
+('Seventh Generation', 1, GETDATE(), GETDATE());
+
+INSERT INTO tb_unidadMedida (nombre_unidad, abreviacion, estado_unidad, created_at, update_at) VALUES
+('Litro', 'L', 1,GETDATE(), GETDATE()),
+('Mililitro', 'ml', 1, GETDATE(), GETDATE()),
+('Galón', 'gal', 1, GETDATE(), GETDATE()),
+('Onza', 'oz', 1, GETDATE(), GETDATE()),
+('Kilogramo', 'kg', 1, GETDATE(), GETDATE()),
+('Gramo', 'g', 1, GETDATE(), GETDATE()),
+('Unidad', 'u', 1, GETDATE(), GETDATE()),
+('Paquete', 'paq', 1, GETDATE(), GETDATE()),
+('Caja', 'caja', 1, GETDATE(), GETDATE()),
+('Botella', 'bot', 1, GETDATE(), GETDATE());
+
+--------------------------------------------------------------------
+-------------------------DASHBOARD ---------------------------------
+--------------------------------------------------------------------
+--- Ventas Diarias por Dia de la Semana:
 
 -- Cambiar la fecha de emisión del 1 al 5
 UPDATE tb_comprobante
@@ -446,7 +480,7 @@ go
 
 
 -----------------------------------------------------------------------------------------------------------------------------------
-------------------------------------------------------------- TRIGGER ------------------------------------------------------------- 
+------------------------------------------------- TRIGGER - AUDITORIA ------------------------------------------------------------- 
 -----------------------------------------------------------------------------------------------------------------------------------
 
 create table AUDITORIA ( -- NUEVA TABLA:
@@ -461,19 +495,22 @@ create table AUDITORIA ( -- NUEVA TABLA:
 )
 GO
 
--- Trigger INSERTAR para tb_producto
--- Trigger INSERTAR para tb_producto
+-- Agregar columna id_user en la tabla AUDITORIA
+ALTER TABLE AUDITORIA ADD id_user INT;
+
+----------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------  PRODUCTO  ---------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------
+
+
+-- TRIGGER INSERTAR PARA tb_producto
 CREATE TRIGGER TR_AuditoriaP_Insertar
 ON tb_producto
 FOR INSERT
 AS
 BEGIN
-    DECLARE @user_id NVARCHAR(50);
-    -- Obtener el contexto del usuario
-    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
-
     INSERT INTO AUDITORIA 
-    SELECT @user_id, 'PRODUCTO', 'INSERTÓ-2', 
+    SELECT 'DESCONOCIDO', 'PRODUCTO', 'INSERTÓ', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            'NINGUNA', 
@@ -483,19 +520,16 @@ END;
 GO
 
 
+-------------------------------------
 
--- Trigger ELIMINAR para tb_producto
+-- TRIGGER ELIMINAR PARA tb_producto
 CREATE TRIGGER TR_AuditoriaP_Eliminar
 ON tb_producto
 FOR DELETE
 AS
 BEGIN
-    DECLARE @user_id NVARCHAR(50);
-    -- Obtener el contexto del usuario
-    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
-
     INSERT INTO AUDITORIA 
-    SELECT @user_id, 'PRODUCTO', 'ELIMINÓ', 
+    SELECT 'DESCONOCIDO', 'PRODUCTO', 'ELIMINÓ', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            'NINGUNA', 
@@ -504,18 +538,16 @@ BEGIN
 END;
 GO
 
--- Trigger ACTUALIZAR para tb_producto
+-------------------------------------
+
+-- TRIGGER ACTUALIZAR PARA tb_producto
 CREATE TRIGGER TR_AuditoriaP_Actualizar
 ON tb_producto
 FOR UPDATE
 AS
 BEGIN
-    DECLARE @user_id NVARCHAR(50);
-    -- Obtener el contexto del usuario
-    SELECT @user_id = CAST(CONVERT(VARCHAR(50), CONTEXT_INFO()) AS NVARCHAR(50));
-
     INSERT INTO AUDITORIA 
-    SELECT @user_id, 'PRODUCTO', 'ACTUALIZÓ', 
+    SELECT 'DESCONOCIDO', 'PRODUCTO', 'ACTUALIZÓ', 
            CONVERT(NVARCHAR(12), id_producto), 
            nombre_prod, 
            (SELECT nombre_prod FROM deleted), 
@@ -524,20 +556,361 @@ BEGIN
 END;
 GO
 
-
--- Verificar auditoría
 SELECT * FROM tb_producto;
+SELECT * FROM AUDITORIA;
+GO
+
+-----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------TRIGGER UNIDAD MEDIDA ------------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-- TRIGGER INSERTAR PARA tb_rol
+CREATE TRIGGER TR_AuditoriaR_Insertar
+ON tb_rol
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'ROL', 'INSERTÓ', 
+           CONVERT(NVARCHAR(12), id_rol), 
+           name_role, 
+           'NINGUNA', 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+
+-------------------------------------
+
+-- TRIGGER ELIMINAR PARA tb_rol
+CREATE TRIGGER TR_AuditoriaR_Eliminar
+ON tb_rol
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'ROL', 'ELIMINÓ', 
+           CONVERT(NVARCHAR(12), id_rol), 
+           name_role, 
+           'NINGUNA', 
+           GETDATE()
+    FROM deleted;
+END;
+GO
+
+-- Verificar auditoría de eliminación en tb_rol
+--SELECT * FROM tb_rol;
+--SELECT * FROM AUDITORIA;
+GO
+
+-------------------------------------
+
+-- TRIGGER ACTUALIZAR PARA tb_rol
+CREATE TRIGGER TR_AuditoriaR_Actualizar
+ON tb_rol
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'ROL', 'ACTUALIZÓ', 
+           CONVERT(NVARCHAR(12), id_rol), 
+           name_role, 
+           (SELECT name_role FROM deleted), 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+-----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------- TRIGGER USUARIO ------------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-- TRIGGER INSERTAR PARA tb_usuario
+CREATE TRIGGER TR_AuditoriaU_Insertar
+ON tb_usuario
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT SUSER_SNAME(), 'USUARIO', 'INSERTÓ', 
+           CONVERT(NVARCHAR(12), id_user), 
+           username, 
+           'NINGUNA', 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+
+-------------------------------------
+
+-- TRIGGER ELIMINAR PARA tb_usuario
+CREATE TRIGGER TR_AuditoriaU_Eliminar
+ON tb_usuario
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'USUARIO', 'ELIMINÓ', 
+           CONVERT(NVARCHAR(12), id_user), 
+           username, 
+           'NINGUNA', 
+           GETDATE()
+    FROM deleted;
+END;
+GO
+
+-------------------------------------
+
+-- TRIGGER ACTUALIZAR PARA tb_usuario
+CREATE TRIGGER TR_AuditoriaU_Actualizar
+ON tb_usuario
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'USUARIO', 'ACTUALIZÓ', 
+           CONVERT(NVARCHAR(12), id_user), 
+           username, 
+           (SELECT username FROM deleted), 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+-----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------- TRIGGER CATEGORIA ------------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-- TRIGGER INSERTAR PARA tb_categoria
+-- Asegúrate de que la tabla AUDITORIA tenga una columna para id_user
+ALTER TABLE AUDITORIA ADD id_user INT;
+
+-- TRIGGER INSERTAR PARA tb_categoria
+CREATE TRIGGER TR_AuditoriaC_Insertar
+ON tb_categoria
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'CATEGORIA', 'INSERTÓ', 
+           CONVERT(NVARCHAR(12), id_categoria), 
+           nombre_categoria, 
+           'NINGUNA', 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+SELECT * FROM tb_categoria;
 SELECT * FROM AUDITORIA;
 
 
 -- Eliminar el trigger de inserción
-DROP TRIGGER IF EXISTS TR_AuditoriaP_Insertar;
+DROP TRIGGER IF EXISTS TR_AuditoriaC_Insertar;
+GO
+-------------------------------------
+
+-- TRIGGER ELIMINAR PARA tb_categoria
+CREATE TRIGGER TR_AuditoriaC_Eliminar
+ON tb_categoria
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'CATEGORIA', 'ELIMINÓ', 
+           CONVERT(NVARCHAR(12), id_categoria), 
+           nombre_categoria, 
+           'NINGUNA', 
+           GETDATE()
+    FROM deleted;
+END;
 GO
 
--- Eliminar el trigger de eliminación
-DROP TRIGGER IF EXISTS TR_AuditoriaP_Eliminar;
+-------------------------------------
+
+-- TRIGGER ACTUALIZAR PARA tb_categoria
+CREATE TRIGGER TR_AuditoriaC_Actualizar
+ON tb_categoria
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'CATEGORIA', 'ACTUALIZÓ', 
+           CONVERT(NVARCHAR(12), id_categoria), 
+           nombre_categoria, 
+           (SELECT nombre_categoria FROM deleted), 
+           GETDATE()
+    FROM inserted;
+END;
 GO
 
--- Eliminar el trigger de actualización
-DROP TRIGGER IF EXISTS TR_AuditoriaP_Actualizar;
+-----------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------- TRIGGER MARCA ------------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-- TRIGGER INSERTAR PARA tb_marca
+CREATE TRIGGER TR_AuditoriaM_Insertar
+ON tb_marca
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'MARCA', 'INSERTÓ', 
+           CONVERT(NVARCHAR(12), id_marca), 
+           nombre_marca, 
+           'NINGUNA', 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+-------------------------------------
+
+-- TRIGGER ELIMINAR PARA tb_marca
+CREATE TRIGGER TR_AuditoriaM_Eliminar
+ON tb_marca
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'MARCA', 'ELIMINÓ', 
+           CONVERT(NVARCHAR(12), id_marca), 
+           nombre_marca, 
+           'NINGUNA', 
+           GETDATE()
+    FROM deleted;
+END;
+GO
+
+-------------------------------------
+
+-- TRIGGER ACTUALIZAR PARA tb_marca
+CREATE TRIGGER TR_AuditoriaM_Actualizar
+ON tb_marca
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'MARCA', 'ACTUALIZÓ', 
+           CONVERT(NVARCHAR(12), id_marca), 
+           nombre_marca, 
+           (SELECT nombre_marca FROM deleted), 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------- TRIGGER COMPROBANTE --------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-- TRIGGER INSERTAR PARA tb_comprobante
+CREATE TRIGGER TR_AuditoriaCB_Insertar
+ON tb_comprobante
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'COMPROBANTE', 'INSERTÓ', 
+           CONVERT(NVARCHAR(12), id_comprobante), 
+           tipo_doc, 
+           'NINGUNA', 
+           GETDATE()
+    FROM inserted;
+END;
+GO
+
+-------------------------------------
+
+-- TRIGGER ELIMINAR PARA tb_comprobante
+CREATE TRIGGER TR_AuditoriaCB_Eliminar
+ON tb_comprobante
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 'DESCONOCIDO', 'COMPROBANTE', 'ELIMINÓ', 
+           CONVERT(NVARCHAR(12), id_comprobante), 
+           tipo_doc, 
+           'NINGUNA', 
+           GETDATE()
+    FROM deleted;
+END;
+GO
+
+-------------------------------------
+
+-- Eliminar el trigger de inserción
+DROP TRIGGER IF EXISTS TR_AuditoriaCB_Actualizar;
+GO
+
+
+-----------------------------------------------------------------------------------------------------------------------------------
+--------------------------------------------------------- TRIGGER CLIENTE --------------------------------------------------------- 
+-----------------------------------------------------------------------------------------------------------------------------------
+
+-------------------------------------------------------------------
+-- TRIGGER INSERTAR PARA tb_cliente
+-------------------------------------------------------------------
+CREATE TRIGGER TR_AuditoriaCLI_Insertar
+ON tb_cliente
+FOR INSERT
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 
+        'DESCONOCIDO',  -- Usuario desconocido
+        'CLIENTE',       -- Tabla afectada
+        'INSERTÓ',       -- Acción realizada
+        CONVERT(NVARCHAR(12), id_cliente), -- ID del cliente como registro
+        nombre_clie + ' ' + apellido_clie, -- Nombre completo del cliente
+        'NINGUNA',       -- Descripción inicial
+        GETDATE()        -- Fecha y hora de la operación
+    FROM inserted;
+END;
+GO
+
+-------------------------------------------------------------------
+-- TRIGGER ELIMINAR PARA tb_cliente
+-------------------------------------------------------------------
+CREATE TRIGGER TR_AuditoriaCLI_Eliminar
+ON tb_cliente
+FOR DELETE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 
+        'DESCONOCIDO',  -- Usuario desconocido
+        'CLIENTE',       -- Tabla afectada
+        'ELIMINÓ',       -- Acción realizada
+        CONVERT(NVARCHAR(12), id_cliente), -- ID del cliente eliminado
+        nombre_clie + ' ' + apellido_clie, -- Nombre completo del cliente
+        'NINGUNA',       -- Descripción inicial
+        GETDATE()        -- Fecha y hora de la operación
+    FROM deleted;
+END;
+GO
+
+-------------------------------------------------------------------
+-- TRIGGER ACTUALIZAR PARA tb_cliente
+-------------------------------------------------------------------
+CREATE TRIGGER TR_AuditoriaCLI_Actualizar
+ON tb_cliente
+FOR UPDATE
+AS
+BEGIN
+    INSERT INTO AUDITORIA 
+    SELECT 
+        'DESCONOCIDO',  -- Usuario desconocido
+        'CLIENTE',       -- Tabla afectada
+        'ACTUALIZÓ',     -- Acción realizada
+        CONVERT(NVARCHAR(12), id_cliente), -- ID del cliente actualizado
+        nombre_clie + ' ' + apellido_clie, -- Nombre completo actual
+        (SELECT nombre_clie + ' ' + apellido_clie FROM deleted), -- Nombre completo previo
+        GETDATE()        -- Fecha y hora de la operación
+    FROM inserted;
+END;
 GO
