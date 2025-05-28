@@ -53,7 +53,6 @@ INSTALLED_APPS = [
     'gestion_almacen',
     'gestion_venta',
     'movimientos',
-    'comprobante_pago',
     'dashboard',
 ]
 
@@ -213,8 +212,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_URL = '/content/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'content/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
