@@ -5,7 +5,6 @@ from authentication.models import CustomUser
 import uuid
 from decimal import Decimal
 from django.utils import timezone
-#from movimientos.models import Sucursal
 
 class Sucursal(models.Model):
     id_sucursal = models.AutoField(primary_key=True)

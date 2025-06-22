@@ -6,12 +6,6 @@ from .models import *
 from .serializers import *
 from rest_framework.permissions import AllowAny  # Importar AllowAny para permitir el acceso sin autenticación
 
-class AuditoriaViewSet(viewsets.ModelViewSet):
-    permission_classes = [AllowAny]
-    queryset = Auditoria.objects.all()
-    serializer_class = AuditoriaSerializer
-    filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['usuario_au', 'tabla', 'accion', 'fecha_hora']
 
 class MovimientoViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny] 

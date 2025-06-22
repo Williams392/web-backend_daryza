@@ -12,25 +12,26 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Cargar variables de entorno desde archivo .env
+load_dotenv(os.path.join(BASE_DIR.parent, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jtb*j^+fm1euecy6lvy9+m^17e4bfq247_&e+)f)fo3dsw&f%6'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-jtb*j^+fm1euecy6lvy9+m^17e4bfq247_&e+)f)fo3dsw&f%6')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
-
 INSTALLED_APPS = [
     # Por defecto:
     'django.contrib.admin',
@@ -40,13 +41,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    
     # Instalado:
     'rest_framework',
     'django_filters',
     'rest_framework.authtoken',
     'drf_yasg',
-    'corsheaders', # 1. Para activar angular con django. ( pip install django-cors-headers )
+    'corsheaders',  # 1. Para activar angular con django. ( pip install django-cors-headers )
 
     # yo:
     'authentication',
@@ -59,13 +59,12 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware', # listo
+    'corsheaders.middleware.CorsMiddleware',  # 2. para activar angular con django.
+    'django.middleware.common.CommonMiddleware',  # listo
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    'corsheaders.middleware.CorsMiddleware', # 2. para activar angular con django.
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -88,9 +87,27 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'core.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+
+# Configuración de base de datos usando variables de entorno
+DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.mysql')
+
+DATABASES = {
+    'default': {
+        'ENGINE': DB_ENGINE,
+        'NAME': os.getenv('DB_NAME', 'bd_daryza_v1'),
+        'USER': os.getenv('DB_USER', 'root'),
+        'PASSWORD': os.getenv('DB_PASSWORD', 'root'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '3306'),
+        'OPTIONS': {
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+        },
+    }
+}
+
+# CONFIGURACIONES COMENTADAS PARA REFERENCIA:
 
 # POR DEFECTO:
 # DATABASES = {
@@ -120,6 +137,7 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Ahora debe de ser de esta forma: python manage.py migrate --database=secondary
 # DATABASE_ROUTERS = ['core.db_routers.AuthRouter']
 
+# CONFIGURACIÓN MYSQL MANUAL:
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
@@ -132,19 +150,19 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # }
 
 # SQL SERVER:
-DATABASES = {
-    'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'BD_DARYZA_DJANGO_V7',
-        'USER': 'sa',
-        'PASSWORD': 'root',
-        'HOST': 'localhost',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'Trusted_Connection': 'yes',
-        },
-    },
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'BD_DARYZA_DJANGO_V7',
+#         'USER': 'sa',
+#         'PASSWORD': 'root',
+#         'HOST': 'localhost',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'Trusted_Connection': 'yes',
+#         },
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -166,9 +184,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # yo: importante para activar el manejo de token:
 REST_FRAMEWORK = {
-   'DEFAULT_AUTHENTICATION_CLASSES': [
+    'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
-       'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
@@ -176,7 +194,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend'
     ],
-    #'COERCE_DECIMAL_TO_STRING': False,
+    # 'COERCE_DECIMAL_TO_STRING': False,
 }
 
 # REST_FRAMEWORK = {
@@ -194,7 +212,6 @@ REST_FRAMEWORK = {
 #     'django.contrib.auth.backends.ModelBackend',
 # ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -206,11 +223,11 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/content/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'content/')
@@ -219,9 +236,20 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'content/')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-AUTH_USER_MODEL = 'authentication.CustomUser' # cambio de login por email
+AUTH_USER_MODEL = 'authentication.CustomUser'  # cambio de login por email
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:4200",  # URL de tu aplicación Angular
-]
-CORS_ALLOW_ALL_ORIGINS = True # 3. para activar angular con django.
+# CORS Configuration
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:4200').split(',')
+CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'True').lower() in ('true', '1', 'yes')
+
+# Configuración adicional para producción
+if not DEBUG:
+    # Configuraciones de seguridad para producción
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

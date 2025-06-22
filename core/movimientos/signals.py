@@ -1,7 +1,7 @@
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.utils import timezone
-from .models import Producto, Auditoria
+from .models import Producto
 from authentication.models import CustomUser
 from django.db.models.signals import post_save, post_delete
 from gestion_almacen.models import Marca, Categoria, UnidadMedida

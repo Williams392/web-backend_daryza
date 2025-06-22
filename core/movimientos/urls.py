@@ -4,7 +4,6 @@ from .views import *
 from reports.reporte_movimientos import DescargarMovimientoPDFView, DescargarExcelMovimientoView
 
 router = DefaultRouter()
-router.register(r'auditorias', AuditoriaViewSet)
 router.register(r'movimientos', MovimientoViewSet)
 router.register(r'detallemovimientos', DetalleMovimientoViewSet)
 router.register(r'tiposmovimientos', TipoMovimientoViewSet)
