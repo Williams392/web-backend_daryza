@@ -2,7 +2,7 @@ import pytest
 from rest_framework.test import APIClient
 from authentication.models import CustomUser, Rol
 
-H. U. 12: Registro de un Nuevo Usuario
+#H. U. 12: Registro de un Nuevo Usuario
 @pytest.fixture
 def rol_usuario():
     return Rol.objects.create(name_role='Administrador')

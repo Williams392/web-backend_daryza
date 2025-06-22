@@ -82,6 +82,7 @@ WEB-BACKEND_DARYZA/
 ├── content/                  # Archivos multimedia y data
 ├── venv/                     # Entorno virtual (solo desarrollo local)
 ├── core/                     # Proyecto Django principal
+│   ├── content/       # Autenticación personalizada
 │   ├── authentication/       # Autenticación personalizada
 │   ├── core/                 # Configuración del proyecto
 │   │   ├── __init__.py
