@@ -1,14 +1,12 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.html import format_html
-import uuid
+from core.models import TimeStampedModel
 
-class Categoria(models.Model):
+class Categoria(TimeStampedModel):
     id_categoria = models.AutoField(primary_key=True)
     nombre_categoria = models.CharField(max_length=100, unique=True)
     estado_categoria = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'tb_categoria'
@@ -20,12 +18,10 @@ class Categoria(models.Model):
         if not self.nombre_categoria:
             raise ValidationError('El nombre de la marca no puede estar vacío.')
 
-class Marca(models.Model):
+class Marca(TimeStampedModel):
     id_marca = models.AutoField(primary_key=True)
     nombre_marca = models.CharField(max_length=100, unique=True)
     estado_marca = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'tb_marca'
@@ -38,13 +34,11 @@ class Marca(models.Model):
             raise ValidationError('El nombre de la marca no puede estar vacío.')
 
 
-class UnidadMedida(models.Model):
+class UnidadMedida(TimeStampedModel):
     id_unidadMedida = models.AutoField(primary_key=True)
     nombre_unidad = models.CharField(max_length=100, unique=True)
     abreviacion = models.CharField(max_length=100, unique=True)
     estado_unidad = models.BooleanField(default=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.nombre_unidad}"
@@ -53,7 +47,7 @@ class UnidadMedida(models.Model):
         db_table = 'tb_unidadMedida'
 
 
-class Producto(models.Model):
+class Producto(TimeStampedModel):
     id_producto = models.AutoField(primary_key=True)
     nombre_prod = models.CharField(max_length=100, unique=True)
     descripcion_pro = models.TextField(blank=True, null=True)
@@ -68,8 +62,6 @@ class Producto(models.Model):
     marca = models.ForeignKey(Marca, on_delete=models.PROTECT)
     categoria = models.ForeignKey(Categoria, on_delete=models.PROTECT)
     unidad_medida = models.ForeignKey(UnidadMedida, on_delete=models.PROTECT)
-    created_at = models.DateTimeField(auto_now_add=True)
-    update_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         db_table = 'tb_producto'
