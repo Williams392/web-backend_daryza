@@ -1,0 +1,36 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  # Servicio de la aplicación Django
+  web:
+    build: .
+    container_name: daryza_backend
+    command: python core/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app
+      - static_volume:/app/staticfiles
+      - media_volume:/app/content
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  # Servicio Redis (opcional - para cache y sessions)
+  redis:
+    image: redis:7-alpine
+    container_name: daryza_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  static_volume:
+  media_volume:
+
+networks:
+  default:
+    name: daryza_network
