@@ -216,3 +216,59 @@ y está asociado a un usuario.
 Es un permiso que se utiliza para restringir el acceso a las vistas 
 solo a usuarios autenticados. Si un usuario no está autenticado, no podrá
 acceder a las vistas protegidas por este permiso.
+
+
+------------------------------------------------------------------------
+--  Comienzo de Docker:
+------------------------------------------------------------------------
+_ Requisitos:
+. Docker
+. Python 3.10.11
+
+_ Estrcutura del Backend:
+WEB-BACKEND_DARYZA/
+|-- content/
+|-- venv/
+|-- core/
+|   |-- authentication/
+|   |-- core/
+|   |   |-- __init__.py
+|   |   |-- setting.py
+|   |   |-- wsgi.py
+|   |-- dashboard/
+|   |-- gestion_almacen/
+|   |-- gestion_venta/
+|   |-- manage.py
+
+|-- .env.local
+|-- .env.prod
+|-- .gitignore
+|-- README.md
+|-- requirements.txt
+
+------------------------------------------------------------------------
+--  🚀 Comandos de inicio rápido - DOCKER:
+------------------------------------------------------------------------
+# 1. Crear configuración
+cp .env.example .env
+
+# 2. Ejecutar con Docker
+docker-compose up --build
+
+# 3. Aplicar migraciones
+docker-compose exec web python manage.py migrate
+
+# 4. Crear superusuario
+docker-compose exec web python manage.py createsuperuser
+
+----- Ver por termina fuincionamiento:
+docker ps -> puertos  docker.
+docker logs daryza_backend -> ver el backend real.
+----- Crear: 
+docker-compose exec web python core/manage.py makemigrations  ---> no poner falla
+docker-compose exec web python core/manage.py migrate
+docker-compose exec web python core/manage.py createsuperuser
+------------------------------------------------------------------------
+_ siempre pasa:
+python core/manage.py migrate
+python core/manage.py migrate authentication

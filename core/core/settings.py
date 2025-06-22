@@ -120,31 +120,31 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Ahora debe de ser de esta forma: python manage.py migrate --database=secondary
 # DATABASE_ROUTERS = ['core.db_routers.AuthRouter']
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bd_daryza_v1',
-#         'USER': 'root',
-#         'PASSWORD': 'root',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     },
-# }
-
-# SQL SERVER:
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'BD_DARYZA_DJANGO_V7',
-        'USER': 'sa',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'bd_daryza_v1',
+        'USER': 'root',
         'PASSWORD': 'root',
         'HOST': 'localhost',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'Trusted_Connection': 'yes',
-        },
+        'PORT': '3306',
     },
 }
+
+# SQL SERVER:
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'BD_DARYZA_DJANGO_V7',
+#         'USER': 'sa',
+#         'PASSWORD': 'root',
+#         'HOST': 'localhost',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'Trusted_Connection': 'yes',
+#         },
+#     },
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
