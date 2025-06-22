@@ -1,4 +1,89 @@
-
 /venv
-
+/.vscode
 /core/db.sqlite3
+
+# Ignorar archivos compilados de Python
+__pycache__/
+*.py[cod]
+
+# Git
+.git
+.gitignore
+README.md
+
+# Docker
+.docker
+Dockerfile*
+docker-compose*
+
+# Python
+__pycache__
+*.py[cod]
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+venv
+.venv
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media
+
+# Environment variables
+.env
+.env.*
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Node modules (si tienes frontend)
+node_modules
+npm-debug.log*
+
+# Backup files
+*.bak
+*.tmp
+
+# Content/Media files
+content/*
+!content/.gitkeep
+
+# Test files
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Documentation
+docs/_build
