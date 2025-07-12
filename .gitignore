@@ -2,3 +2,10 @@
 /venv
 
 /core/db.sqlite3
+
+
+# Ignorar todos los archivos .pyc
+*.pyc
+
+# Ignorar todas las carpetas __pycache__ en cualquier lugar
+__pycache__/
