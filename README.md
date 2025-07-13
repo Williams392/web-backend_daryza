@@ -54,6 +54,67 @@ WEB-BACKEND_DARYZA/
 - Docker Desktop instalado
 - Docker Compose v2+
 
+<<<<<<< HEAD
+=======
+The API will be available at `http://127.0.0.1:8000/`
+# Backend Daryza 2025
+
+Backend de gestión empresarial desarrollado con Django REST Framework, con soporte completo para Docker y despliegue en contenedores.
+
+## 📋 Tabla de Contenidos
+
+- [Tecnologías](#-tecnologías)
+- [Estructura del Proyecto](#-estructura-del-proyecto)
+- [Instalación con Docker](#-instalación-con-docker)
+- [Instalación Manual](#-instalación-manual)
+- [Configuración de Base de Datos](#-configuración-de-base-de-datos)
+- [API Endpoints](#-api-endpoints)
+- [Comandos Útiles](#-comandos-útiles)
+- [Troubleshooting](#-troubleshooting)
+
+## 🛠️ Tecnologías
+
+- **Framework**: Django 5.0.9 + Django REST Framework
+- **Base de Datos**: SQL Server (MSSQL)
+- **Documentación API**: Swagger (drf-yasg)
+- **Contenedores**: Docker & Docker Compose
+- **Python**: 3.10.11
+
+## 📁 Estructura del Proyecto
+
+```bash
+WEB-BACKEND_DARYZA/
+├── content/                  # Archivos multimedia y data
+├── venv/                     # Entorno virtual (solo desarrollo local)
+├── core/                     # Proyecto Django principal
+│   ├── content/       # Autenticación personalizada
+│   ├── authentication/       # Autenticación personalizada
+│   ├── core/                 # Configuración del proyecto
+│   │   ├── __init__.py
+│   │   ├── settings.py
+│   │   └── wsgi.py
+│   ├── dashboard/            # Panel de control
+│   ├── gestion_almacen/      # Gestión de inventario
+│   ├── gestion_venta/        # Gestión de ventas
+│   ├── movimientos/          # Movimientos de inventario
+│   └── manage.py
+├── .env.local                # Variables de entorno (desarrollo)
+├── .env.prod                 # Variables de entorno (producción)
+├── .gitignore
+├── Dockerfile                # Configuración Docker
+├── docker-compose.yml        # Orquestación de contenedores
+├── README.md
+└── requirements.txt          # Dependencias Python
+```
+
+## 🐳 Instalación con Docker
+
+### Prerrequisitos
+
+- Docker Desktop instalado
+- Docker Compose v2+
+
+>>>>>>> origin/pre-development
 ### 1. Clonar el repositorio
 
 ```bash

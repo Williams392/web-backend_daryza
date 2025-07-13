@@ -12,9 +12,9 @@ from gestion_venta.models import Comprobante
 from gestion_venta.models import Cliente
 from authentication.models import CustomUser
 from gestion_almacen.models import Producto 
-from movimientos.models import Movimiento, TipoMovimiento
+from movimientos.models import Movimiento
 
-from django.db.models.functions import TruncDate, TruncMonth
+from django.db.models.functions import TruncDay
 
 class DashboardViewClienteSet(viewsets.ViewSet):
     
@@ -102,22 +102,46 @@ class DashboardViewComprobanteSet(viewsets.ViewSet):
             "porcentaje_aumento_comprobantes": porcentaje_aumento_comprobantes
         })
     
-    # GRAFICO:
+    # GRAFICO CORREGIDO PARA MYSQL:
     @action(detail=False, methods=['get'])
     def ventas_por_dia_semana(self, request):
         fecha_actual = now()
         fecha_inicio = fecha_actual - timedelta(days=7)
         
+        # OPCIÓN 1: Usando DAYOFWEEK de MySQL (recomendada)
         ventas_diarias = Comprobante.objects.filter(fecha_emision__gte=fecha_inicio).extra(
-            select={'dia_semana': "DATEPART(weekday, fecha_emision)"}
+            select={'dia_semana': "DAYOFWEEK(fecha_emision)"}
         ).values('dia_semana').annotate(total_ventas=Sum('monto_Imp_Venta')).order_by('dia_semana')
         
+        # MySQL DAYOFWEEK devuelve: 1=Domingo, 2=Lunes, ..., 7=Sábado
         dias_semana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
         ventas_diarias = [{**venta, 'dia_semana': dias_semana[int(venta['dia_semana']) - 1]} for venta in ventas_diarias]
         
         return Response(ventas_diarias)
     
-from django.db.models.functions import TruncDay
+    # ALTERNATIVA: Método más compatible con diferentes bases de datos
+    @action(detail=False, methods=['get'])
+    def ventas_por_dia_semana_alternativa(self, request):
+        from django.db.models.functions import Extract
+        
+        fecha_actual = now()
+        fecha_inicio = fecha_actual - timedelta(days=7)
+        
+        # Usar Extract para obtener el día de la semana (más compatible)
+        ventas_diarias = Comprobante.objects.filter(
+            fecha_emision__gte=fecha_inicio
+        ).annotate(
+            dia_semana=Extract('fecha_emision', 'week_day')
+        ).values('dia_semana').annotate(
+            total_ventas=Sum('monto_Imp_Venta')
+        ).order_by('dia_semana')
+        
+        # Django Extract week_day: 1=Domingo, 2=Lunes, ..., 7=Sábado
+        dias_semana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+        ventas_diarias = [{**venta, 'dia_semana': dias_semana[int(venta['dia_semana']) - 1]} for venta in ventas_diarias]
+        
+        return Response(ventas_diarias)
+
 class DashboardVieMovieminentoSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['get'])
@@ -170,4 +194,3 @@ class DashboardVieMovieminentoSet(viewsets.ViewSet):
         except Exception as e:
             # Capturar cualquier error inesperado
             return Response({'error': str(e)}, status=500)
-

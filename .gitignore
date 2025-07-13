@@ -1,10 +1,17 @@
 /venv
 /.vscode
 /core/db.sqlite3
+/core/gestion_almacen/__pycache__/
+/core/gestion_venta/__pycache__/
+/core/movimientos/migrations/__pycache__/
+/core/movimientos/__pycache__/
+/core/authentication/migrations/__pycache__/
+/core/reports/__pycache__/
 
-# Ignorar archivos compilados de Python
+# Ignorar todos los archivos y carpetas de compilación de Python
 __pycache__/
 *.py[cod]
+
 
 # Git
 .git
@@ -77,8 +84,8 @@ npm-debug.log*
 *.tmp
 
 # Content/Media files
-content/*
-!content/.gitkeep
+# content/*
+# !content/.gitkeep
 
 # Test files
 .pytest_cache/

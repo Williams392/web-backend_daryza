@@ -243,18 +243,3 @@ class ComprobanteSerializer(serializers.ModelSerializer):
             representation['cliente'] = None  # O algún valor por defecto
 
         return representation
-
-
-
-# class DetalleComprobanteSerializer(serializers.ModelSerializer):
-
-#     monto_valorUnitario = TwoDecimalField(max_digits=10, decimal_places=2)
-#     igv_detalle = TwoDecimalField(max_digits=10, decimal_places=2)
-#     monto_Precio_Unitario = TwoDecimalField(max_digits=10, decimal_places=2)
-#     monto_Valor_Venta = TwoDecimalField(max_digits=10, decimal_places=2)
-
-#     class Meta:
-#         model = DetalleComprobante
-#         fields = ['id_detalleComprobante', 'id_producto', 'unidad', 'descripcion', 'cantidad', 
-#                   'monto_valorUnitario', 'igv_detalle',
-#                   'monto_Precio_Unitario', 'monto_Valor_Venta']

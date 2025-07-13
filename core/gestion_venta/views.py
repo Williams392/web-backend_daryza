@@ -110,6 +110,11 @@ class ComprobanteAPIView(APIView):
         # Asignar el usuario autenticado al comprobante
         comprobante_data['usuario'] = request.user.id_user
 
+        # Determinar si aplica IGV según el tipo de documento
+        # Boletas (tipo_doc = "03") no aplican IGV - IGV siempre 0.00
+        # Facturas (tipo_doc = "01") sí aplican IGV
+        aplica_igv = comprobante_data.get('tipo_doc') == "01"  # True para facturas, False para boletas
+
         monto_Oper_Gravadas = Decimal('0.00')
         monto_Igv = Decimal('0.00')
         sub_Total = Decimal('0.00')
@@ -151,12 +156,24 @@ class ComprobanteAPIView(APIView):
             detalle['monto_valorUnitario'] = producto.precio_venta.quantize(Decimal('0.00'))
             
             monto_valor_unitario = Decimal(detalle['monto_valorUnitario']).quantize(Decimal('0.00'))
-            igv_unitario = (monto_valor_unitario * Decimal('0.18')).quantize(Decimal('0.00'))
-            detalle['monto_Precio_Unitario'] = (monto_valor_unitario + igv_unitario).quantize(Decimal('0.00'))
+            
+            # Calcular IGV solo para facturas, para boletas siempre es 0.00
+            if aplica_igv:
+                igv_unitario = (monto_valor_unitario * Decimal('0.18')).quantize(Decimal('0.00'))
+                detalle['monto_Precio_Unitario'] = (monto_valor_unitario + igv_unitario).quantize(Decimal('0.00'))
+            else:
+                igv_unitario = Decimal('0.00')
+                detalle['monto_Precio_Unitario'] = monto_valor_unitario.quantize(Decimal('0.00'))
 
             monto_valor_venta = (monto_valor_unitario * Decimal(cantidad)).quantize(Decimal('0.00'))
             detalle['monto_Valor_Venta'] = monto_valor_venta
-            igv_detalle = (monto_valor_venta * Decimal('0.18')).quantize(Decimal('0.00'))
+            
+            # IGV del detalle: 0.00 para boletas, calculado para facturas
+            if aplica_igv:
+                igv_detalle = (monto_valor_venta * Decimal('0.18')).quantize(Decimal('0.00'))
+            else:
+                igv_detalle = Decimal('0.00')
+            
             detalle['igv_detalle'] = igv_detalle
 
             monto_Oper_Gravadas += monto_valor_venta
@@ -167,7 +184,7 @@ class ComprobanteAPIView(APIView):
         comprobante_data['detalle'] = detalle_data
         comprobante_data['forma_pago'] = forma_pago_data
         comprobante_data['monto_Oper_Gravadas'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
-        comprobante_data['monto_Igv'] = monto_Igv.quantize(Decimal('0.00'))
+        comprobante_data['monto_Igv'] = monto_Igv.quantize(Decimal('0.00'))  # Será 0.00 para boletas
         comprobante_data['valor_venta'] = monto_Oper_Gravadas.quantize(Decimal('0.00'))
         comprobante_data['sub_Total'] = sub_Total.quantize(Decimal('0.00'))
         comprobante_data['monto_Imp_Venta'] = monto_Imp_Venta.quantize(Decimal('0.00'))

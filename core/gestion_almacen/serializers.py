@@ -73,27 +73,10 @@ class ProductoSerializer(serializers.ModelSerializer):
         producto.save()
         return producto
 
-    # def create(self, validated_data):
-    #     if 'codigo' not in validated_data or not validated_data['codigo']:
-    #         last_product = Producto.objects.all().order_by('id_producto').last()
-    #         if last_product and last_product.codigo.startswith('P-'):
-    #             try:
-    #                 last_number = int(last_product.codigo.split('-')[1])
-    #                 new_number = last_number + 1
-    #                 validated_data['codigo'] = f'P-{new_number:07d}'
-    #             except (IndexError, ValueError):
-    #                 validated_data['codigo'] = 'P-00001'
-    #         else:
-    #             validated_data['codigo'] = 'P-00001'
-        
-    #     producto = Producto.objects.create(**validated_data)
-    #     return producto
-
     def update(self, instance, validated_data):
         # Manejo especial para el archivo de imagen, si es proporcionado
         imagen = validated_data.pop('imagen', None)
         if imagen:
             instance.imagen = imagen
         
-        # Actualiza los otros campos
         return super().update(instance, validated_data)
