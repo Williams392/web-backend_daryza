@@ -9,8 +9,4 @@ class TimeStampedModel(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-<<<<<<< HEAD
         abstract = True
-=======
-        abstract = True
->>>>>>> origin/pre-development

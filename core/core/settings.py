@@ -137,34 +137,6 @@ DATABASES = {
 # Ahora debe de ser de esta forma: python manage.py migrate --database=secondary
 # DATABASE_ROUTERS = ['core.db_routers.AuthRouter']
 
-<<<<<<< HEAD
-# CONFIGURACIÓN MYSQL MANUAL:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'bd_daryza_v1',
-#         'USER': 'root',
-#         'PASSWORD': 'root',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     },
-# }
-
-# SQL SERVER:
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'mssql',
-#         'NAME': 'BD_DARYZA_DJANGO_V7',
-#         'USER': 'sa',
-#         'PASSWORD': 'root',
-#         'HOST': 'localhost',
-#         'OPTIONS': {
-#             'driver': 'ODBC Driver 17 for SQL Server',
-#             'Trusted_Connection': 'yes',
-#         },
-#     },
-# }
-=======
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -175,7 +147,6 @@ DATABASES = {
         'PORT': '3306',
     },
 }
->>>>>>> origin/pre-development
 
 # SQL SERVER:
 # DATABASES = {
