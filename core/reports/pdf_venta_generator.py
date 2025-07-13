@@ -167,5 +167,30 @@ def generar_pdf_comprobante(comprobante_data):
         c.drawString(425, y_position - table_height - 75, f"IGV (18%): {comprobante_data['monto_Igv']}")
         c.drawString(425, y_position - table_height - 90, f"Total: {comprobante_data['monto_Imp_Venta']}")
 
+     # FOOTER PROFESIONAL E INDUSTRIAL - Cumpliendo estándares SUNAT:
+    footer_y = 120  # Posición del footer
+    
+    # Línea superior del footer
+    c.setStrokeColorRGB(0.3, 0.3, 0.3)
+    c.setLineWidth(2)
+    c.line(30, footer_y + 20, width - 30, footer_y + 20)
+    
+    # Cuadro de representación impresa
+    c.setStrokeColorRGB(0.4, 0.4, 0.4)
+    c.setLineWidth(1)
+    c.rect(30, footer_y - 25, width - 60, 15)
+    c.setFont("Helvetica-Bold", 7)
+    c.drawCentredString(width / 2, footer_y - 18, "REPRESENTACIÓN IMPRESA DEL COMPROBANTE DE PAGO ELECTRÓNICO")
+    
+    # Información adicional de validación
+    c.setFont("Helvetica", 6)
+    c.drawString(30, footer_y - 40, f"Consulte la validez del documento en: www.sunat.gob.pe")
+    c.drawRightString(width - 30, footer_y - 40, f"Documento procesado por sistema certificado")
+    
+    # Línea inferior
+    c.setStrokeColorRGB(0.3, 0.3, 0.3)
+    c.setLineWidth(1)
+    c.line(30, footer_y - 50, width - 30, footer_y - 50)
+
     c.save()
     return output_path
