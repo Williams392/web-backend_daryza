@@ -10,6 +10,11 @@
 5. comando -> python manage.py createsuperuser
 6. comando -> python manage.py startapp xxxxx
 
+_ en ubuntu:
+. sudo apt update
+. sudo apt install python3.12-venv
+. python3 -m venv venv
+
 #---------------------------------------------------------------
 CREANDO PROYECTO DJANGO:
 #---------------------------------------------------------------
